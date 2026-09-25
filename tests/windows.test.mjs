@@ -71,10 +71,7 @@ test('repoRoot() memoization: wait invokes git rev-parse at most a constant numb
     if (firstLine) realGit = firstLine.trim();
   } catch {}
 
-  const runnerPath = path.join(bin, 'git-runner.mjs');
-  fs.writeFileSync(
-    runnerPath,
-    `import fs from 'node:fs';
+  const scriptContent = `import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 const args = process.argv.slice(2);
 if (args.includes('rev-parse') && args.includes('--show-toplevel')) {
@@ -87,10 +84,11 @@ const res = spawnSync(${JSON.stringify(realGit)}, args, { encoding: 'utf8' });
 if (res.stdout) process.stdout.write(res.stdout);
 if (res.stderr) process.stderr.write(res.stderr);
 process.exit(res.status ?? 0);
-`
-  );
+`;
 
   if (isWin) {
+    const runnerPath = path.join(bin, 'git-runner.mjs');
+    fs.writeFileSync(runnerPath, scriptContent);
     fs.writeFileSync(
       path.join(bin, 'git.cmd'),
       `@echo off\r\n"${process.execPath}" "${runnerPath}" %*\r\n`
@@ -98,7 +96,7 @@ process.exit(res.status ?? 0);
   } else {
     fs.writeFileSync(
       path.join(bin, 'git'),
-      `#!${process.execPath}\nimport '${runnerPath}';\n`,
+      `#!${process.execPath}\n${scriptContent}`,
       { mode: 0o755 }
     );
   }

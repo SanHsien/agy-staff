@@ -19,6 +19,10 @@ jobs:
     name: Tests (Ubuntu)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,6 +47,10 @@ jobs:
     name: Tests (Windows)
     runs-on: windows-latest
     timeout-minutes: 20
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 

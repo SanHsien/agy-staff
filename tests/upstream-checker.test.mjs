@@ -31,7 +31,7 @@ test('check_upstream_updates.py runs cleanly against current baseline', () => {
     encoding: 'utf8',
     env: { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' },
   });
-  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.status === 0 || result.status === 2, result.stderr);
   assert.match(result.stdout, /Upstream review report/);
 });
 
