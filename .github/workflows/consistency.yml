@@ -20,6 +20,7 @@ jobs:
 
   test-ubuntu:
     name: Tests (Ubuntu)
+    if: github.repository == 'keli-wen/agy-staff'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -32,6 +33,7 @@ jobs:
   test-windows:
     # Gated by the "manual-tests" environment: a reviewer must approve before it runs.
     name: Tests (Windows)
+    if: github.repository == 'keli-wen/agy-staff'
     runs-on: windows-latest
     environment: manual-tests
     timeout-minutes: 30

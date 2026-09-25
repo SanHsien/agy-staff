@@ -25,7 +25,7 @@
   "scripts": {
     "generate:pi": "node scripts/generate-pi-skills.mjs",
     "check:pi": "node scripts/generate-pi-skills.mjs --check",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test --test-timeout=60000 --test-concurrency=1 tests/*.test.mjs",
     "test:pi": "node --test tests/pi.integration.mjs",
     "prepack": "npm run check:pi"
   },
