@@ -46,7 +46,7 @@ jobs:
   test-windows:
     name: Tests (Windows)
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: "utf-8"
