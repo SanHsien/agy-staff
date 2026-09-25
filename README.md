@@ -1,152 +1,162 @@
 <p align="center"><img src="assets/logo/gemini-agy.svg" width="440" alt="AGY-STAFF"></p>
 
-<p align="center"><a href="README.md">English</a> | <a href="README.zh-CN.md">Simplified Chinese</a></p>
+<p align="center"><strong>繁體中文</strong> | <a href="README.en.md">English</a> | <a href="README.zh-CN.md">Simplified Chinese</a></p>
 
 <p align="center"><a href="https://antigravity.google/product/antigravity-cli"><img src="assets/badges/powered-by-antigravity.svg" height="20" alt="powered by: Antigravity"></a> <img src="assets/badges/model-gemini-3-8-flash.svg" height="20" alt="model: Gemini 3.8 Flash"></p>
 
 <p align="center"><a href="https://claude.com/claude-code"><img src="assets/badges/claude-code-plugin.svg" height="20" alt="Claude Code plugin"></a> <a href="https://developers.openai.com/codex/"><img src="assets/badges/codex-plugin.svg" height="20" alt="Codex plugin"></a> <a href="LICENSE"><img src="assets/badges/license-mit.svg" height="20" alt="license: MIT"></a></p>
 
-Hire Google's Antigravity CLI (`agy`) as a staffer for **Claude Code**, **OpenAI Codex**, and **Pi**.
+把 Google 的 Antigravity CLI (`agy`) 當作小弟，直接在 **Claude Code**、**OpenAI Codex** 與 **Pi** 中呼喚它起來做事！
 
 ![agy-staff design](assets/design.png)
 
-**[Install](#install) · [Examples](#cujs) · [Core design](#core-design) · [Upgrade](#upgrade)**
+**[安裝指南](#安裝指南) · [常見情境 (CUJs)](#常見情境-cujs) · [核心設計](#核心設計) · [升級方式](#升級方式) · [Fork 維護說明](FORK.md)**
 
-## What & Why
+---
 
-agy-staff lets your senior agents delegate to `agy`, which ships fast Gemini 3.8 Flash. Five personas: staffer (general-purpose), researcher, reviewer (code **and** plans/decisions), implementer, and ask — plus a model-facing jobs skill. Claude Code uses `/agy:<persona>` and Codex uses `$agy:<persona>`.
+## 為什麼需要它？(What & Why)
 
-If you use Codex you know the feeling: GPT-5.6-Sol is slow even with fast mode on. Claude Code is quicker but still not fast, and Fable quota is scarce enough that you want it orchestrating subagents, not grinding through every survey and review itself. An agy worker gives you a fast lane — second opinions in seconds, research and reviews at Flash speed, scoped implementation handled off to the side while you keep moving. And where speed isn't the point, a second model family looking at the same code buys coverage and robustness your main agent can't give itself.
+`agy-staff` 讓主代理人（資深 Agent）將具體工作委派給 `agy`，享受極速的 **Gemini 3.8 Flash** 模型支援。
+它提供五種角色（Personas）：
+- `staffer`（全能小弟，通用任務與產圖）
+- `researcher`（調研程式庫與架構）
+- `reviewer`（代碼審閱與方案評估）
+- `implementer`（邊界修復與功能實作）
+- `ask`（免工具快速諮詢）
+- 以及一個主導任務編排的 `lead` 與模型專用的工作管理系統（Jobs）。
+
+在 Claude Code 中使用 `/agy:<persona>`，在 Codex 中使用 `$agy:<persona>`。
+
+如果你用過 Codex，你一定深有同感：GPT-5.6-Sol 即使開啟 fast 模式依然不快；Claude Code 雖然較快，但額度珍貴，你更希望它負責統籌與決策，而不是耗費額度去翻遍整個 repo 或審查長篇改動。
+呼喚一個 `agy` 小弟，為你開闢一條**極速通道**——數秒內獲得跨模型二審、以 Flash 速度完成技術調研，並把邊界修復丟到背景執行，主代理人可以繼續往下走。即便不談速度，**讓第二個獨立的模型家族審閱同一段程式碼**，也能帶來單一模型無法自查的覆蓋度與健全性！
 
 ![two overloaded senior agents hand the baton to one fast agy worker](assets/why.png)
 
-## How
+---
 
-### Invoke a persona
+## 使用方式 (How)
 
-Type `/agy:` in Claude Code and the five personas are right there:
+### 喚起角色 (Invoke a persona)
 
-![the /agy: command menu in Claude Code](assets/claude-code-screenshot.png)
+在 Claude Code 中輸入 `/agy:`，所有角色隨叫隨到：
 
-Same plugin in Codex, invoked with `$agy`:
+![Claude Code 中的 /agy: 命令選單](assets/claude-code-screenshot.png)
 
-![the $agy skill picker in Codex](assets/codex-desktop-screenshot.png)
+在 Codex 中以 `$agy` 喚起外掛：
 
-### Install
+![Codex 中的 $agy 技能選單](assets/codex-desktop-screenshot.png)
 
-#### For humans
+---
 
-Step 1 — install the Antigravity CLI ([official docs](https://antigravity.google/docs/cli/install)), then verify with `agy --version`. Node.js is also required:
+## 安裝指南 (Install)
+
+### 人類安裝
+
+**步驟 1** — 安裝 Antigravity CLI（[官方文件](https://antigravity.google/docs/cli/install)），並確認 `agy --version` 運作正常（需要 Node.js 20+）：
 
 ```bash
+# Linux / macOS / WSL
 curl -fsSL https://antigravity.google/cli/install.sh | bash
 ```
+> Windows 原生環境請依 Google Antigravity 官方指示安裝並將 `agy` 加入 PATH。
 
-Step 2 — install the plugin into your harness:
+**步驟 2** — 將外掛安裝至您的編程 Harness：
 
-```bash
-claude plugin marketplace add keli-wen/agy-staff
-claude plugin install agy@agy-staff
-```
-
-```bash
-codex plugin marketplace add https://github.com/keli-wen/agy-staff
-codex plugin add agy@agy-staff
-```
+- **Claude Code**：
+  ```bash
+  claude plugin marketplace add keli-wen/agy-staff
+  claude plugin install agy@agy-staff
+  ```
+- **OpenAI Codex**：
+  ```bash
+  codex plugin marketplace add https://github.com/keli-wen/agy-staff
+  codex plugin add agy@agy-staff
+  ```
 
 <details>
-<summary>Using Pi?</summary>
+<summary>使用 Pi 嗎？</summary>
 
-Install: `pi install git:github.com/keli-wen/agy-staff`.
-Skills are prefixed as `/skill:agy-<persona>` (e.g. `/skill:agy-ask reply with OK`), with `/skill:agy-jobs` for job management.
-Update with `pi update --extension git:github.com/keli-wen/agy-staff`, then run `/reload`.
+安裝：`pi install git:github.com/keli-wen/agy-staff`。
+技能前綴為 `/skill:agy-<persona>`（例如 `/skill:agy-ask reply with OK`），並以 `/skill:agy-jobs` 進行工作管理。
+更新時執行 `pi update --extension git:github.com/keli-wen/agy-staff` 後執行 `/reload`。
 
 </details>
 
-Restart Claude Code or Codex afterwards. First run: `/agy:ask reply with OK` (Claude Code) or `$agy:ask reply with OK` (Codex). Ask is tool-free and needs no setup.
+安裝後請重啟 Claude Code 或 Codex。初次執行可先測試：
+- Claude Code：`/agy:ask reply with OK`
+- Codex：`$agy:ask reply with OK`
+`ask` 角色免用本機工具，無需額外配置即可回應。
 
 > [!IMPORTANT]
-> **There is no mandatory setup step.** `staffer`, `researcher`, `reviewer` and `implementer` run **unrestricted** by default: agy can inspect the repo, run commands, and edit files. agy-staff keeps that practical with prompts that adapt to the current repo state. For example, when `implementer` starts in a dirty workspace, the companion tells agy which files already had changes and reminds it not to overwrite or deliver unrelated user work. If the task asks for a commit, push, or PR, agy can do that delivery; otherwise it leaves a working-tree diff for review. These prompt instructions do not provide permission isolation.
-> `setup` + `--restricted` is **optional hardening** for untrusted input — per run (`--restricted`) or as a per-repo default (`setup --restrict review,research`). `setup` dry-runs and asks before writing anything ("set up agy" triggers it); read the [permission notes](docs/REFERENCE.md#optional-hardening-setup) first — the allowlist is prefix-matched, applies machine-wide, and a restricted run can return less than an unrestricted one.
+> **沒有強制的設定步驟。** `staffer`、`researcher`、`reviewer` 與 `implementer` 預設以 **unrestricted** 模式運行：`agy` 具有讀取 repo、執行指令與修改檔案的能力。
 
-#### For agents
+### 給 Agent 的安裝指令
 
-Paste this into any coding agent:
+直接複製以下提示詞丟給任何 Coding Agent：
 
-```
+```text
 Read the raw text of https://raw.githubusercontent.com/keli-wen/agy-staff/master/docs/INSTALL_FOR_AGENTS.md (curl it — do not
 work from a summary) and follow it to install and verify the agy-staff plugin for the harness you are running in.
 Respond in the user's language.
 ```
 
-#### Upgrade
+---
 
-Claude Code and Codex install a *copy*, so a new version only reaches you when you pull it in yourself:
+## 常見情境 (CUJs)
 
-```bash
-claude plugin marketplace update agy-staff && claude plugin update agy@agy-staff
-```
+下列範例以 Claude Code 的 `/agy:…` 為例；Codex 請使用 `$agy:…`。
 
-```bash
-codex plugin marketplace upgrade && codex plugin add agy@agy-staff  # then restart Codex
-```
-
-Claude Code and Codex cache per version directory, so an upgrade lands only if the plugin version changed; restart the harness afterwards. If a fix does not show up, see [upgrading](docs/REFERENCE.md#upgrading) — it has the force-refresh command.
-
-### CUJs
-
-Examples below use Claude Code's `/agy:…`; in Codex use `$agy:…`.
-
-| Use case | Invocation |
+| 使用情境 | 呼叫方式 |
 |---|---|
-| Lead an ongoing task | `/agy:lead investigate the options, draft a proposal, and revise it with my feedback` |
-| Quick second opinion | `/agy:ask what's your backend model` |
-| A general task | `/agy:staffer summarize the open TODOs in this repo` |
-| Generate an image | `/agy:staffer generate a pixel-art robot mascot, save it as assets/mascot.png` |
-| Review the working tree | `/agy:reviewer Review the current working tree` |
-| Review a PR | `/agy:reviewer Review PR #730` |
-| Review a plan or decision | `/agy:reviewer Challenge the migration plan in docs/plan.md` |
-| Survey a topic | `/agy:researcher how does auth work in this repo` |
-| Implement a scoped fix | `/agy:implementer fix the flaky retry test` |
-| Job ops (wait/status/cancel/continue) | natural language: "is the agy job done?", "continue: also check the error path" |
+| **主導進行中的任務** | `/agy:lead investigate the options, draft a proposal, and revise it with my feedback` |
+| **快速二審諮詢** | `/agy:ask what's your backend model` |
+| **一般委派任務** | `/agy:staffer summarize the open TODOs in this repo` |
+| **生成圖片** | `/agy:staffer generate a pixel-art robot mascot, save it as assets/mascot.png` |
+| **審閱工作區改動** | `/agy:reviewer Review the current working tree` |
+| **審閱 Pull Request** | `/agy:reviewer Review PR #730` |
+| **挑戰方案或設計決策** | `/agy:reviewer Challenge the migration plan in docs/plan.md` |
+| **主題調研與架構梳理** | `/agy:researcher how does auth work in this repo` |
+| **實作邊界修復** | `/agy:implementer fix the flaky retry test` |
+| **工作運維 (wait/status/cancel/continue)** | 自然語言即可："is the agy job done?", "continue: also check the error path" |
 
-`reviewer` is fully prompt-based: you describe the subject and agy gathers the evidence itself (`gh pr view`, `git diff`, reading the file) — there is no flag for handing it a diff. It has two flavors, routed by subject: code review (severity-ranked findings) and general review (a multi-angle challenge of a plan, design, or decision).
+`reviewer` 完全基於提示詞：您只需說明對象，`agy` 會自行蒐集證據（`gh pr view`、`git diff`、閱讀檔案）——不需手動傳 diff。
+`staffer` 同時涵蓋了 `agy` 的原生工具，包括**圖像生成**（`generate_image`）。在 agy v1.1.15 上實測約 30 秒內即可產出 1024×1024 PNG 圖檔。
 
-`staffer` also covers agy's native tools without a dedicated specialist persona, including **image generation** (`generate_image`). A trial on agy v1.1.15 produced a 1024×1024 PNG in about 30 seconds; actual time depends on the task and environment.
+---
 
-## Core design
+## 核心設計 (Core design)
 
-`lead` adds task orchestration guidance for your current agent. Within lead, orient enough to frame the assignment, delegate substantive work to `staffer` by default, wait for the result, then assess it and integrate or follow up. Specialists provide dedicated guidance when useful, while `ask` is reserved for testing. The host owns cross-task decisions, acceptance, integration, and delivery, using the existing jobs workflow. Invoke `/agy:lead` in Claude Code, `$agy:lead` in Codex, or `/skill:agy-lead` in Pi.
+- `lead` 為主代理人提供任務編排指引。先定位並拆解目標，將實質工作委派給 `staffer`，等待結果並評估吸收。
+- `ask` 在同一次呼叫中直接同步回應。其他角色會回傳 job id 與收集指令（如 `wait <id> --timeout 10m`），在背景執行。
+- 主代理人預設等待最終結果，必要時可使用 `observe` 查看近期工具動態與部分產出快照。任務完成後，`wait` 或 `result` 會遞送完整成果報告。
 
-`ask` answers in the same call. The other personas return a job id and a collection command, such as `wait <id> --timeout 10m`. Your agent waits using the host's available capabilities, with one independent background wait per job where supported.
+[![背景任務執行流程圖](assets/integration.png)](assets/integration.svg)
 
-The main agent waits for the final result by default. If you explicitly ask about progress, it can use `observe` to read a snapshot of recent tool activity and response text; it does not query progress for routine updates. Once the task finishes, `wait` or `result` delivers the full report. Expiring a wait leaves the worker running.
+---
 
-The timeline below follows a background task from delegation to completion. The host agent waits for the final result by default (or advances already-identified independent work), checks progress when asked, and collects the report.
+## 本 Fork 維護特色 (SanHsien Maintenance Fork)
 
-[![A background task over time: the host delegates, waits or observes, while the worker continuously saves AGY output and eventually delivers the full report](assets/integration.png)](assets/integration.svg)
+本倉庫為 [`SanHsien/agy-staff`](https://github.com/SanHsien/agy-staff) 維護型 fork，特別加強：
 
-Jobs have a separate execution deadline: default 60 minutes, configurable at launch with `--timeout` up to 120 minutes. Use `cancel` to stop execution, or explicitly request `continue` or `restart` after inspecting the existing work. The host harness controls when your agent receives a background result.
+1. **Windows 11 原生環境全面修復**：修正 Git 偵測（`where.exe`）、路徑分隔符號（`path.delimiter`）與檔案權限防禦，全套 190+ 測試 100% 綠燈。
+2. **一鍵驗收門禁**：提供 [`tools/dev_check.ps1`](tools/dev_check.ps1)，整合測試、技能校驗、連結檢查與上游水位巡檢。
+3. **自動化上游水位追蹤**：配備 [`tools/upstream_baseline.json`](tools/upstream_baseline.json) 與 [`tools/check_upstream_updates.py`](tools/check_upstream_updates.py)，監控 upstream commit、PR 與 issue。
+4. **AI 代理單一真相源**：完備的 [`AGENTS.md`](AGENTS.md)、[`FORK.md`](FORK.md)、[`CLAUDE.md`](CLAUDE.md) 與 [`GEMINI.md`](GEMINI.md)。
 
-**Full reference →** [docs/REFERENCE.md](docs/REFERENCE.md) (flags, permission model, jobs/state, troubleshooting, upgrading). **Release notes →** [docs/releases/](docs/releases/).
+---
 
-## Community
+## 相關文件
 
-- [LINUX DO](https://linux.do/) — A next-generation Linux community.
+- [Fork 維護手冊與架構差異 (`FORK.md`)](FORK.md)
+- [AI 代理維護與開發規範 (`AGENTS.md`)](AGENTS.md)
+- [Windows 開發指南 (`docs/DEVELOPMENT.md`)](docs/DEVELOPMENT.md)
+- [架構決策紀錄 (`docs/DECISIONS.md`)](docs/DECISIONS.md)
+- [上游同步手冊 (`docs/UPSTREAM.md`)](docs/UPSTREAM.md)
+- [驗證覆核報告 (`REVIEW.md`)](REVIEW.md)
+- [官方完整手冊 (`docs/REFERENCE.md`)](docs/REFERENCE.md)
 
-## Contributing
+---
 
-Contributions are welcome — issues, bug reports and pull requests all help.
+## 授權條款
 
-A few things worth knowing before you open a PR:
-
-- **Run the tests**: `npm test`. The standard suite uses temporary repos and HOME directories with fake `agy`, plus focused module tests. Keep regression tests offline and independent of personal settings. Real AGY validation is a separate opt-in suite described in [tests/README.md](tests/README.md).
-- **Docs come in pairs**: `README.md` / `README.zh-CN.md` and `docs/REFERENCE.md` / `docs/REFERENCE.zh-CN.md` are kept in sync. Change one, change its counterpart.
-- **Runtime code lives in `companion/`**: the entrypoint handles modes and job commands; separate modules handle streaming execution, observations and state locking. Skills call the companion, and `templates/` holds the shared prompts.
-- **Canonical skills are the source of truth**: edit personas in `skills/`, never in `pi-skills/`. Run `npm run generate:pi` to generate Pi entrypoints, and `npm run check:pi` to verify consistency.
-
-Adding a mode or a flag changes the public surface, so please open an issue first and we can agree on the shape.
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+MIT License — 詳見 [LICENSE](LICENSE)。

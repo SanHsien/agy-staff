@@ -61,12 +61,20 @@ test('repoRoot() memoization: wait invokes git rev-parse at most a constant numb
   const id = jobIdOf(dispatch.stdout);
 
   // Fake git wrapper: increments counter on rev-parse --show-toplevel and returns sb.repo
-  const realGit = spawnSync('which', ['git'], { encoding: 'utf8' }).stdout.trim() || 'git';
-  const fakeGit = path.join(bin, 'git');
+  const isWin = process.platform === 'win32';
+  let realGit = 'git';
+  try {
+    const probe = isWin
+      ? spawnSync('where.exe', ['git'], { encoding: 'utf8' })
+      : spawnSync('which', ['git'], { encoding: 'utf8' });
+    const firstLine = probe.stdout?.split(/\r?\n/).find(l => l.trim());
+    if (firstLine) realGit = firstLine.trim();
+  } catch {}
+
+  const runnerPath = path.join(bin, 'git-runner.mjs');
   fs.writeFileSync(
-    fakeGit,
-    `#!${process.execPath}
-import fs from 'node:fs';
+    runnerPath,
+    `import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 const args = process.argv.slice(2);
 if (args.includes('rev-parse') && args.includes('--show-toplevel')) {
@@ -79,12 +87,24 @@ const res = spawnSync(${JSON.stringify(realGit)}, args, { encoding: 'utf8' });
 if (res.stdout) process.stdout.write(res.stdout);
 if (res.stderr) process.stderr.write(res.stderr);
 process.exit(res.status ?? 0);
-`,
-    { mode: 0o755 }
+`
   );
 
+  if (isWin) {
+    fs.writeFileSync(
+      path.join(bin, 'git.cmd'),
+      `@echo off\r\n"${process.execPath}" "${runnerPath}" %*\r\n`
+    );
+  } else {
+    fs.writeFileSync(
+      path.join(bin, 'git'),
+      `#!${process.execPath}\nimport '${runnerPath}';\n`,
+      { mode: 0o755 }
+    );
+  }
+
   const waitRes = run(sb, ['wait', id], {
-    PATH: `${bin}:${process.env.PATH}`,
+    PATH: `${bin}${path.delimiter}${process.env.PATH}`,
   });
   assert.equal(waitRes.code, 0, waitRes.stderr);
 

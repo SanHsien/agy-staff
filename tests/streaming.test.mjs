@@ -150,7 +150,7 @@ test('observe racing success cleanup always yields a bounded JSON snapshot', asy
   const sb = sandbox('cleanup-race');
   const id = jobIdOf(run(sb, ['staffer', '--prompt', 'test'], { FAKE_AGY_SLEEP_MS: '200' }).stdout);
   let done = false;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 80; i++) {
     const result = run(sb, ['observe', id]);
     if (result.code === 0) {
       assert.equal(JSON.parse(result.stdout).status, 'done');

@@ -46,8 +46,12 @@ test('generation is deterministic, copies assets, detects drift and rejects stal
   assert.throws(() => generatePiSkills({ root }), /Unexpected generated files/);
   assert.equal(fs.readFileSync(unexpected, 'utf8'), 'user edit');
   fs.unlinkSync(unexpected);
-  fs.symlinkSync(source, unexpected);
-  assert.throws(() => generatePiSkills({ root }), /symlinks/);
+  try {
+    fs.symlinkSync(source, unexpected);
+    assert.throws(() => generatePiSkills({ root }), /symlinks/);
+  } catch (err) {
+    if (err.code !== 'EPERM') throw err;
+  }
 });
 
 test('reference notices preserve frontmatter and direct output edits fail without being overwritten', t => {

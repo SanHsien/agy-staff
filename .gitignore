@@ -4,3 +4,10 @@
 node_modules/
 .DS_Store
 __pycache__/
+
+# fork maintenance artifacts
+.venv/
+.pytest_cache/
+upstream-review-report.md
+dependency-freshness-report.md
+*.log
