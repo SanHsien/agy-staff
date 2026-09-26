@@ -1,6 +1,6 @@
 # agy-staff — Full reference
 
-Back to the [README](../README.md). See the [Chinese reference](REFERENCE.zh-CN.md).
+Back to the [README](../README.md).
 
 ## Modes and defaults
 

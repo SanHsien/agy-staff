@@ -10,6 +10,14 @@ export function exec(command, args, options = {}) {
   return result.stdout;
 }
 
+// On Windows, Git for Windows' GNU tar often precedes the built-in bsdtar on PATH
+// and parses `C:\...` as a remote `host:path` archive. Pin the system tar.
+function tarCommand() {
+  if (process.platform !== 'win32') return 'tar';
+  const systemTar = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe');
+  return fs.existsSync(systemTar) ? systemTar : 'tar';
+}
+
 // Use the real npm packlist and tarball, not a hand-maintained imitation of it.
 // Lifecycle scripts are disabled; generation freshness has a separate test.
 export function pack(root) {
@@ -20,6 +28,6 @@ export function pack(root) {
   }))[0];
   const extracted = path.join(root, 'extracted');
   fs.mkdirSync(extracted);
-  exec('tar', ['-xzf', path.join(root, output.filename), '-C', extracted]);
+  exec(tarCommand(), ['-xzf', path.join(root, output.filename), '-C', extracted]);
   return { metadata: output, dir: path.join(extracted, 'package') };
 }

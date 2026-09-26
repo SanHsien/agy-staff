@@ -24,12 +24,32 @@
   1. `windows.test.mjs` 引入跨平台 Git 偵測（Windows 使用 `where.exe`，POSIX 使用 `which`）、自動生成 `git.cmd` 封裝腳本，並採用 `path.delimiter`。
   2. `pi-packaging.test.mjs` 對 `fs.symlinkSync` 加入 `EPERM` 例外捕獲，確保無提權環境亦能平穩過關。
   3. `streaming.test.mjs` 適度放寬輪詢次數至 80 次，防止慢速磁碟或高負載下行程競爭。
-- **理由**：落實 Windows 11 原生開發環境原則，消除平台誤報，確保在 Windows 上達到 100% 綠燈通過。
+- **理由**：落實 Windows 11 原生開發環境原則，消除平台誤報。（當時未涵蓋 tar 問題，見決策四。）
 
 ---
 
 ### 決策三：繁體中文主說明文件與雙語鏡像
 
 - **背景**：本 fork 主要面向繁體中文環境的 AI 代理人與開發者，上游預設為英文 `README.md` 與簡體中文 `README.zh-CN.md`。
-- **決定**：將繁體中文設置為倉庫的預設說明文件 `README.md`，英文原版保留為 `README.en.md`，並在兩份文件頂部建立雙向超連結，同時保留原有的 `README.zh-CN.md`。
+- **決定**：將繁體中文設置為倉庫的預設說明文件 `README.md`，英文原版保留為 `README.en.md`，並在兩份文件頂部建立雙向超連結。
 - **理由**：符合艦隊共通規範（SCAFFOLD.md），確保本地閱讀體驗清晰自然。
+- **修訂（2026-09-26）**：README 只維持繁中與英文兩版。刪除 `README.zh-CN.md` 與 `docs/REFERENCE.zh-CN.md`，並移除社群、贊助與自我推廣類連結；只保留 MIT 授權要求的上游歸屬說明（README 與 `NOTICE.md`）。`docs/releases/` 為上游歷史發行紀錄，保持原文不改。
+
+---
+
+### 決策四：套件測試固定使用 Windows 內建 tar
+
+- **背景**：`tests/pi-pack-helpers.mjs` 以 `tar -xzf` 解開 `npm pack` 產物。本機 PATH 中 Git for Windows 的 GNU tar 排在 `C:\Windows\System32\tar.exe`（bsdtar）之前，GNU tar 把 `C:\...` 解讀為 `host:path` 遠端封存，導致 `tests/pi-packaging.test.mjs` 在本機失敗；GitHub Windows runner 的 PATH 順序不同，所以 CI 綠燈。
+- **決定**：Windows 上固定呼叫 `%SystemRoot%\System32\tar.exe`，找不到時才退回 PATH 上的 `tar`。其他平台不變。
+- **理由**：改動最小、不新增依賴，且與 PATH 順序無關。
+
+---
+
+### 上游 issue 分流（2026-09-26）
+
+| 項目 | 判定 | 理由 |
+|---|---|---|
+| #25 Idea: optional Adam Network channel for the staffer to post findings | Skip / 跟隨上游 | 功能提案，非錯誤；上游採納並發行後依 release 追蹤帶入。 |
+| #26 请求加入opencode支持 | Skip / 跟隨上游 | 功能請求，非錯誤；上游採納並發行後依 release 追蹤帶入。 |
+
+處理後 `tools/upstream_baseline.json` 的 `reviewed_issue_through` 由 `24` 提升為 `26`。

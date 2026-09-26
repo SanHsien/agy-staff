@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/logo/gemini-agy.svg" width="440" alt="AGY-STAFF"></p>
 
-<p align="center"><a href="README.md">繁體中文</a> | <a href="README.zh-CN.md">Simplified Chinese</a> | <strong>English</strong></p>
+<p align="center"><a href="README.md">繁體中文</a> | <strong>English</strong></p>
 
 <p align="center"><a href="https://antigravity.google/product/antigravity-cli"><img src="assets/badges/powered-by-antigravity.svg" height="20" alt="powered by: Antigravity"></a> <img src="assets/badges/model-gemini-3-8-flash.svg" height="20" alt="model: Gemini 3.8 Flash"></p>
 
@@ -130,10 +130,6 @@ Jobs have a separate execution deadline: default 60 minutes, configurable at lau
 
 **Full reference →** [docs/REFERENCE.md](docs/REFERENCE.md) (flags, permission model, jobs/state, troubleshooting, upgrading). **Release notes →** [docs/releases/](docs/releases/).
 
-## Community
-
-- [LINUX DO](https://linux.do/) — A next-generation Linux community.
-
 ## Contributing
 
 Contributions are welcome — issues, bug reports and pull requests all help.
@@ -141,11 +137,14 @@ Contributions are welcome — issues, bug reports and pull requests all help.
 A few things worth knowing before you open a PR:
 
 - **Run the tests**: `npm test`. The standard suite uses temporary repos and HOME directories with fake `agy`, plus focused module tests. Keep regression tests offline and independent of personal settings. Real AGY validation is a separate opt-in suite described in [tests/README.md](tests/README.md).
-- **Docs come in pairs**: `README.md` / `README.zh-CN.md` and `docs/REFERENCE.md` / `docs/REFERENCE.zh-CN.md` are kept in sync. Change one, change its counterpart.
 - **Runtime code lives in `companion/`**: the entrypoint handles modes and job commands; separate modules handle streaming execution, observations and state locking. Skills call the companion, and `templates/` holds the shared prompts.
 - **Canonical skills are the source of truth**: edit personas in `skills/`, never in `pi-skills/`. Run `npm run generate:pi` to generate Pi entrypoints, and `npm run check:pi` to verify consistency.
 
 Adding a mode or a flag changes the public surface, so please open an issue first and we can agree on the shape.
+
+## Fork
+
+This is a maintenance fork of [`keli-wen/agy-staff`](https://github.com/keli-wen/agy-staff) (MIT License), maintained at [`SanHsien/agy-staff`](https://github.com/SanHsien/agy-staff). See [`FORK.md`](FORK.md) for the divergence and [`REVIEW.md`](REVIEW.md) for the latest verification evidence.
 
 ## License
 

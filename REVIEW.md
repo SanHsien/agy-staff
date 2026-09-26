@@ -12,6 +12,14 @@
 
 在這台符合本 repo 自身文件（`docs/DEVELOPMENT.md`：需要 Git for Windows 2.40+）所述設定的 Windows 11 原生機器上，`tools\dev_check.ps1` 兩次獨立完整執行（含腳本內建重試）**均以非零 exit code 結束**，卡在同一個測試：`tests/pi-packaging.test.mjs` 的 `actual npm archive contains resources and runs ask + detached job collection outside checkout`。GitHub Actions 上的 Windows CI（`db8b4ef`, run `36172147919`）顯示綠燈，但那是因為 GitHub 代管的 `windows-latest` runner 上 `tar` 解析順序與本機不同，並非這個 bug 已修好；本地被文件宣稱要覆蓋的「Windows 11 原生環境」實際上仍會撞到它。
 
+### 1.1 複驗（同日，tar 修正後）
+
+- 修正：`tests/pi-pack-helpers.mjs` 在 Windows 上固定呼叫 `%SystemRoot%\System32\tar.exe`（見 `docs/DECISIONS.md` 決策四）。
+- `node --test --test-concurrency=1 tests/pi-packaging.test.mjs`：`tests 7 / pass 7 / fail 0`。
+- `powershell -File tools\dev_check.ps1` 完整執行：5 個測試批次全部 `fail 0`，合計 `pass 196 / skipped 2`，本次無批次重試；Pi skills `11 files (0 changed)`；連結檢查 `14 份 overlay 文件，0 份有缺檔`。
+- 唯一紅燈為上游新 issue #25、#26 尚未分流；已在 `docs/DECISIONS.md` 判定為 Skip / 跟隨上游並把 `reviewed_issue_through` 提升到 `26`。
+- 結論更新：**本機 Windows 11 原生環境測試全綠**，上一節的不通過判定已由本次修正解除。
+
 ---
 
 ## 2. 實跑證據
@@ -80,7 +88,7 @@ completed  success  ci(gate): implement fresh-process batches and remove file-le
 
 ## 4. 待決問題（需維護者決定，本次未動）
 
-1. **（中）`tests/pi-packaging.test.mjs` 的 tar 解壓在本機 Windows 環境會失敗**，見第 2 節。建議方向二選一（或都做）：
+1. **（已解決，見 1.1）** ~~**（中）`tests/pi-packaging.test.mjs` 的 tar 解壓在本機 Windows 環境會失敗**~~，採用第一個方向。原始分析保留如下：建議方向二選一（或都做）：
    - 讓 `tests/pi-pack-helpers.mjs` 明確呼叫 `C:\Windows\System32\tar.exe`（bsdtar）而非依賴 PATH 中第一個 `tar`；
    - 或改用 Node 內建 zlib + 一個不吃 GNU tar 遠端語法的最小 tar 解包（或 `npm` 套件如 `tar`）取代外部 `tar.exe` 呼叫。
    兩個方向都需要在真正的 Windows 機器上重新驗證，本次覆核時間內未能收斂出可信的一行修復，故未直接改動。
@@ -91,6 +99,8 @@ completed  success  ci(gate): implement fresh-process batches and remove file-le
 ## 5. 本次已修復
 
 - `AGENTS.md`「常用指令」區塊仍列著舊的 `node --test --test-timeout=60000 --test-concurrency=1 tests/*.test.mjs`，與目前 `package.json` 的 `npm test`（`node --test --test-concurrency=1 tests/*.test.mjs`，已移除 `--test-timeout`）及 `tools/dev_check.ps1` 的 fresh-process 批次機制不一致，已同步修正為與 `npm test` 一致的指令。
+- `tests/pi-pack-helpers.mjs`：Windows 固定使用系統 bsdtar（tar 根因修正）。
+- README 只維持繁中（`README.md`）與英文（`README.en.md`）兩版：刪除 `README.zh-CN.md`、`docs/REFERENCE.zh-CN.md`，移除 LINUX DO 社群連結與「100% 綠燈」宣稱，補上 MIT 上游歸屬說明；`package.json` 的 `files`、`docs/REFERENCE.md`、`FORK.md`、`docs/DECISIONS.md` 同步更新。
 
 ---
 
@@ -99,3 +109,4 @@ completed  success  ci(gate): implement fresh-process batches and remove file-le
 - `.github/dependabot.yml` 已存在（上游繼承），涵蓋 `github-actions` 與 `npm` 兩個 ecosystem 的每週更新掃描。
 - `gh api repos/SanHsien/agy-staff/vulnerability-alerts` 回傳 `204 No Content`，代表本 fork 的 Dependabot 安全性警示（vulnerability alerts）**已經是啟用狀態**，不需要額外開啟。
 - `package.json` 目前無任何 `dependencies` / `devDependencies`（零依賴專案），因此 npm 生態的 Dependabot 警示短期內預期不會有實際觸發項；主要價值在 `github-actions` 這個 ecosystem（`actions/checkout`、`actions/setup-node` 等）。建議維持現狀即可，不需調整設定。
+- 2026-09-26 已另外開啟自動安全更新（`automated-security-fixes` → `{"enabled":true}`）。

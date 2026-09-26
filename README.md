@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/logo/gemini-agy.svg" width="440" alt="AGY-STAFF"></p>
 
-<p align="center"><strong>繁體中文</strong> | <a href="README.en.md">English</a> | <a href="README.zh-CN.md">Simplified Chinese</a></p>
+<p align="center"><strong>繁體中文</strong> | <a href="README.en.md">English</a></p>
 
 <p align="center"><a href="https://antigravity.google/product/antigravity-cli"><img src="assets/badges/powered-by-antigravity.svg" height="20" alt="powered by: Antigravity"></a> <img src="assets/badges/model-gemini-3-8-flash.svg" height="20" alt="model: Gemini 3.8 Flash"></p>
 
@@ -136,9 +136,9 @@ Respond in the user's language.
 
 ## 本 Fork 維護特色 (SanHsien Maintenance Fork)
 
-本倉庫為 [`SanHsien/agy-staff`](https://github.com/SanHsien/agy-staff) 維護型 fork，特別加強：
+本倉庫是 [`keli-wen/agy-staff`](https://github.com/keli-wen/agy-staff)（MIT License）的維護型 fork：[`SanHsien/agy-staff`](https://github.com/SanHsien/agy-staff)，特別加強：
 
-1. **Windows 11 原生環境全面修復**：修正 Git 偵測（`where.exe`）、路徑分隔符號（`path.delimiter`）與檔案權限防禦，全套 190+ 測試 100% 綠燈。
+1. **Windows 11 原生環境相容性修復**：修正 Git 偵測（`where.exe`）、路徑分隔符號（`path.delimiter`）與檔案權限防禦。目前已知例外與最新實跑結果見 [`REVIEW.md`](REVIEW.md)（非全數通過）。
 2. **一鍵驗收門禁**：提供 [`tools/dev_check.ps1`](tools/dev_check.ps1)，整合測試、技能校驗、連結檢查與上游水位巡檢。
 3. **自動化上游水位追蹤**：配備 [`tools/upstream_baseline.json`](tools/upstream_baseline.json) 與 [`tools/check_upstream_updates.py`](tools/check_upstream_updates.py)，監控 upstream commit、PR 與 issue。
 4. **AI 代理單一真相源**：完備的 [`AGENTS.md`](AGENTS.md)、[`FORK.md`](FORK.md)、[`CLAUDE.md`](CLAUDE.md) 與 [`GEMINI.md`](GEMINI.md)。
