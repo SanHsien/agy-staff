@@ -45,8 +45,8 @@
 # 快速測試通道
 .\tools\dev_check.ps1 -Quick
 
-# 單元測試全套執行（Node.js 原生測試器）
-node --test --test-timeout=60000 --test-concurrency=1 tests/*.test.mjs
+# 單元測試全套執行（Node.js 原生測試器，等同 npm test）
+node --test --test-concurrency=1 tests/*.test.mjs
 
 # 重新生成 Pi skills 並驗證一致性
 npm run generate:pi
