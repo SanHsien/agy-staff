@@ -1,0 +1,13 @@
+# per-repo runtime state written by the companion (jobs, logs, conversation ids)
+.agy-staff/
+
+node_modules/
+.DS_Store
+__pycache__/
+
+# fork maintenance artifacts
+.venv/
+.pytest_cache/
+upstream-review-report.md
+dependency-freshness-report.md
+*.log

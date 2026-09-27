@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 回報本 fork 的 Windows 維護問題
+    url: https://github.com/SanHsien/agy-staff/issues/new
+    about: 針對 Windows 11 原生相容性、測試、維護門禁等問題進行回報。
+  - name: 🌐 上游 agy-staff 官方問題
+    url: https://github.com/keli-wen/agy-staff/issues
+    about: 關於 agy-staff 跨平台通用功能、角色設計與插件規範，請向上游反饋。
+  - name: 🔒 回報安全漏洞 (Security Vulnerability)
+    url: https://github.com/SanHsien/agy-staff/security/advisories/new
+    about: 私密通報安全性弱點。

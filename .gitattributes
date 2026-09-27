@@ -1,0 +1,9 @@
+# Check out text files with LF on every platform: the Pi skill generator and
+# its tests parse SKILL.md frontmatter with \n, which CRLF breaks.
+* text=auto eol=lf
+
+pi-skills/** linguist-generated=true
+
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
