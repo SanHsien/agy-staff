@@ -2,7 +2,7 @@ name: Upstream check
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - tools/check_upstream_updates.py
       - tools/upstream_baseline.json
