@@ -90,7 +90,7 @@ if ($Quick) {
     $batches = @(
         [PSCustomObject]@{
             Name = "Platform-Packaging"
-            Files = @("tests/windows.test.mjs", "tests/pi-packaging.test.mjs", "tests/upstream-checker.test.mjs")
+            Files = @("tests/windows.test.mjs", "tests/pi-packaging.test.mjs", "tests/upstream-checker.test.mjs", "tests/dependency-freshness.test.mjs")
         },
         [PSCustomObject]@{
             Name = "Companion-Core"
