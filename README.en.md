@@ -146,6 +146,10 @@ Adding a mode or a flag changes the public surface, so please open an issue firs
 
 This is a maintenance fork of [`keli-wen/agy-staff`](https://github.com/keli-wen/agy-staff) (MIT License), maintained at [`SanHsien/agy-staff`](https://github.com/SanHsien/agy-staff). See [`FORK.md`](FORK.md) for the divergence and [`REVIEW.md`](REVIEW.md) for the latest verification evidence.
 
+## Multi-agent pipeline
+
+This repo is one piece of the [agent-relay](https://github.com/SanHsien/agent-relay) multi-agent dispatch and verification pipeline (role: cross-CLI worker — a primary agent hands subtasks to agy through the `implementer`/`researcher` skills, and agent-relay task mail with `--run agy` uses agy for read-only review). The protocol spec and the index of every related repo live in agent-relay.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

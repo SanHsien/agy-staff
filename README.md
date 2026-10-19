@@ -157,6 +157,10 @@ Respond in the user's language.
 
 ---
 
+## 多 Agent 流水線
+
+本 repo 是 [agent-relay](https://github.com/SanHsien/agent-relay) 多 Agent 派工與驗收流水線的一環（角色：跨 CLI 執行端 Worker——主 Agent 經 `implementer`／`researcher` 技能把子任務交給 agy；agent-relay 派工信 `--run agy` 也用 agy 唯讀審查）。協定規格與所有相關 repo 的總目錄見 agent-relay。
+
 ## 授權條款
 
 MIT License — 詳見 [LICENSE](LICENSE)。
