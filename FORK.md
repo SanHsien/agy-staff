@@ -17,7 +17,7 @@
 3. **上游水位雙軌追蹤**：
    建立 `tools/upstream_baseline.json` 與 `tools/check_upstream_updates.py`，完整涵蓋 commit、PR 與 issue 三個維度的水位監控。
 4. **AI 治理與多 Agent 規範**：
-   落地 `AGENTS.md` 單一真相源，並提供 `CLAUDE.md`、`GEMINI.md` 以及 `.cursor/rules/no-upstream-pr.mdc`，防止誤向上游提交 PR。
+   落地 `AGENTS.md` 單一真相源，並提供 `GEMINI.md` 以及 `.cursor/rules/no-upstream-pr.mdc`，防止誤向上游提交 PR。
 5. **雙語文件、無推廣性連結**：
    README 僅維持繁體中文主文（`README.md`）與英文鏡像（`README.en.md`）兩個版本，移除簡體中文版與非產品性質的連結（例如社群/贊助/自我推廣類連結），只保留必要的上游歸屬連結（MIT 授權要求）。
 
@@ -31,7 +31,7 @@
 | **Windows 原生支援** | 修正 `tests/windows.test.mjs`（`where.exe`、`.cmd` wrapper、`path.delimiter`）、`tests/pi-packaging.test.mjs`（EPERM 防禦）、`tests/streaming.test.mjs` | 原測試偏向 Linux / macOS / WSL 環境 |
 | **一鍵式驗證 Gate** | `tools/dev_check.ps1`（支援 `-Quick`，全綠才能提交） | 無單一腳本一鍵門禁 |
 | **上游追蹤水位** | `tools/upstream_baseline.json` + `tools/check_upstream_updates.py`（每週 Actions） | 無 |
-| **AI 代理規範** | `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`.cursor/rules/no-upstream-pr.mdc` | 僅 `.agents/` 提示詞範本 |
+| **AI 代理規範** | `AGENTS.md`、`GEMINI.md`、`.cursor/rules/no-upstream-pr.mdc` | 僅 `.agents/` 提示詞範本 |
 | **連結檢查** | `tools/check_links.py` | 無 |
 | **CI 測試** | 包含 Windows 與 Ubuntu 雙平台完整測試，含 CodeQL 靜態分析 | 上游 Windows 測試受手動審查環境限制 |
 
