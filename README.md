@@ -141,7 +141,7 @@ Respond in the user's language.
 1. **Windows 11 原生環境相容性修復**：修正 Git 偵測（`where.exe`）、路徑分隔符號（`path.delimiter`）與檔案權限防禦。目前已知例外與最新實跑結果見 [`REVIEW.md`](REVIEW.md)（非全數通過）。
 2. **一鍵驗收門禁**：提供 [`tools/dev_check.ps1`](tools/dev_check.ps1)，整合測試、技能校驗、連結檢查與上游水位巡檢。
 3. **自動化上游水位追蹤**：配備 [`tools/upstream_baseline.json`](tools/upstream_baseline.json) 與 [`tools/check_upstream_updates.py`](tools/check_upstream_updates.py)，監控 upstream commit、PR 與 issue。
-4. **AI 代理單一真相源**：完備的 [`AGENTS.md`](AGENTS.md)、[`FORK.md`](FORK.md) 與 [`GEMINI.md`](GEMINI.md)。
+4. **AI 代理單一真相源**：完備的 [`AGENTS.md`](AGENTS.md) 與 [`FORK.md`](FORK.md)。
 
 ---
 
