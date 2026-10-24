@@ -53,3 +53,45 @@
 | #26 请求加入opencode支持 | Skip / 跟隨上游 | 功能請求，非錯誤；上游採納並發行後依 release 追蹤帶入。 |
 
 處理後 `tools/upstream_baseline.json` 的 `reviewed_issue_through` 由 `24` 提升為 `26`。
+
+---
+
+## 2026-10-24
+
+### 上游分流：v0.7.4、PR #27–#41、issue #28–#40
+
+- **背景**：上游發行 v0.7.4（OpenCode 外掛支援），並新增一批 bench（評測框架）相關 PR 與 issue，`Tests (Windows)` 的上游檢查因此轉紅，連帶擋住只改 job 名稱的 PR #1。
+- **決定**：本輪只做紀錄，不引進任何程式碼。凡本來會判為「採用」的項目，一律寫成「延後，由既有的上游同步工作處理」：v0.7.4、PR #41、issue #40 的引進候選已在另一條同步工作中進行，這裡重做會與之衝突。明顯無關的項目判為不採用。
+- **理由**：分流紀錄與實際引進分屬兩件事；紀錄先落地才能讓巡檢回到有意義的訊號，引進則留給同步工作做完整的合併與測試。
+- **基準推進**：`reviewed_through` 推進到 v0.7.4 tag 的 commit `9a30e07`，`reviewed_release` 為 `v0.7.4`。追蹤模式為 `track: release`，待審 commit 只有這一個，已在下表記錄。上游 `master` 在 v0.7.4 之後的其餘 commit（含 PR #29、#33、#35–#38、#41）尚未發行，依 release 追蹤等其發行時再審，這些 PR 與 issue 本身已在下表記錄判定。
+
+#### 上游 release／commit
+
+| 項目 | 判定 | 理由 |
+|---|---|---|
+| v0.7.4 `9a30e07` feat: add OpenCode plugin support (0.7.4) (#27) | 延後，由既有的上游同步工作處理 | 新增 OpenCode 外掛（30 個檔案、約 +994/-63），需連同產生器、測試與 Windows 硬化一併合併驗證；已有同步工作承接。 |
+
+#### 上游 pull request
+
+| 項目 | 判定 | 理由 |
+|---|---|---|
+| #27 feat: add OpenCode plugin support (0.7.4) | 延後，由既有的上游同步工作處理 | 即 v0.7.4 本體，同上；關閉上游 issue #26。 |
+| #29 docs: add DESIGN.md, the portable bash + skills design | 延後，由既有的上游同步工作處理 | 新增 `docs/DESIGN.md` 並改動兩份 README；本 fork 的 README 只維持繁中與英文，需改寫後引進，留待同步工作。 |
+| #33 docs(bench): publish agy-staff Bench v1 results table | 延後，由既有的上游同步工作處理 | bench v1 結果表與資料，是 #35–#38、#41 的同一系列，須整批引進才一致。 |
+| #35 feat(bench): add the grading and analysis pipeline | 延後，由既有的上游同步工作處理 | bench 評分管線，#41 的前置；引進 #41 時必然一起帶入，不在此單獨處理。 |
+| #36 feat(bench): add the trial runner | 延後，由既有的上游同步工作處理 | bench 試驗執行器，#41 的前置，同上。 |
+| #37 feat(bench): add the cost, tokens and solved-vs-cost charts | 延後，由既有的上游同步工作處理 | bench 圖表，與 v1 資料同一系列，同上。 |
+| #38 fix(bench): v1 erratum: cost accounting, SymPy test-name grading, the 0118 rule violation | 延後，由既有的上游同步工作處理 | 修正 bench v1 的成本計算與評分勘誤，與 #33 的資料綁在一起，須同批引進。 |
+| #41 fix(bench): preserve startup errors and complete Codex native v1 results | 延後，由既有的上游同步工作處理 | 保留環境啟動錯誤並補齊 Codex native v1 結果，關閉 #40；引進候選已在別處進行。 |
+
+#### 上游 issue
+
+| 項目 | 判定 | 理由 |
+|---|---|---|
+| #28 docs: add DESIGN.md — the portable bash + skills design behind agy-staff | 延後，由既有的上游同步工作處理 | 已由 #29 處理並關閉，隨 #29 一併判定。 |
+| #31 Prélèvements non autorisés | 不採用 | 法文的扣款退費申訴，內容與 agy-staff 無關（提到的是另一個 WhatsApp 助理服務），上游已關閉。 |
+| #34 Bench: agy-staff Harness & Orchestration Bench (tracking) | 不採用 | 上游評測框架的長期追蹤 issue，本身不含需要引進的變更；實際內容由 #33–#41 各 PR 承載，已於上表判定。 |
+| #39 Bench v1: the native-subagent setup beats agy on host spend for SWE-bench — worth a line in "What v1 says"? | 不採用 | 對上游 bench README 敘述的建議，屬上游文案決定，與本 fork 的維護範圍無關；若上游修改文案，會隨 bench 同步帶入。 |
+| #40 bug(bench): preserve environment startup errors instead of reporting egress failure | 延後，由既有的上游同步工作處理 | bench 診斷錯誤，由 #41 修正；引進候選已在別處進行。 |
+
+處理後 `tools/upstream_baseline.json` 的 `reviewed_pr_through` 由 `24` 提升為 `41`，`reviewed_issue_through` 由 `26` 提升為 `40`，`reviewed_through` 與 `reviewed_release` 推進到 v0.7.4。
