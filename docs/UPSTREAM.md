@@ -91,7 +91,7 @@ python tools\check_upstream_updates.py --strict
 
 - Release：`v0.7.4`／`9a30e0774de09e0815c4fc5caf456472f8fc3509` 已審閱，判定為
   defer；此 Windows 維護型 fork 未承諾 OpenCode host。
-- PR：已逐筆審閱至 #41（皆已 merge）；issue：已逐筆審閱至 #40，包括已關閉項目。
+- PR：已逐筆審閱至 #41（#27–#41 皆已 merge）；issue：已逐筆審閱至 #40，包括已關閉項目。
 - Branch：上游 `master` 為 `7925452`；GitHub branches endpoint 只回傳 `master`，
   沒有額外分支可採用。
 

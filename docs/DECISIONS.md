@@ -109,7 +109,7 @@ release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，�
 
 | 項目 | 判定 | 證據與本 fork 的對照 | 重新評估條件 |
 | --- | --- | --- | --- |
-| `v0.7.4`／#27／`9a30e07` | defer | 30 檔、+994/-63；新增 `opencode.mjs`、11 份 `opencode-skills/**`、雙 target generator 與 OpenCode 測試。`companion/` 與 `skills/` 在 `HEAD..9a30e07` 沒有任何差異，即沒有 runtime 修復可單獨移植。本 fork 的 `package.json` 只發佈 `skills/`、`pi-skills/`，沒有 OpenCode host 驗收。 | 維護者明確要求 OpenCode 支援並核准 product scope（`package.json`、generator、`opencode.mjs`、安裝文件、OpenCode 測試與 Windows package smoke）。 |
+| `v0.7.4`／#27／`9a30e07` | defer | 30 檔、+994/-63；新增 `opencode.mjs`、11 份 `opencode-skills/**`、雙 target generator 與 OpenCode 測試。`companion/` 與 `skills/` 在 `HEAD..9a30e07` 沒有任何差異，即沒有 runtime 修復可單獨移植。本 fork 的 `package.json` 沒有 `opencode-skills/`、`opencode.mjs`、`main`／`exports`，也沒有 OpenCode host 驗收。 | 維護者明確要求 OpenCode 支援並核准 product scope（`package.json`、generator、`opencode.mjs`、安裝文件、OpenCode 測試與 Windows package smoke）。 |
 | #29／`65a1ab4` | reject | 3 檔、+204/-2，只新增跨 host／Bash 設計說明與 README 導覽，不修正本 fork 的 Windows runtime 或治理契約。 | fork 需要公開設計文件，且內容可改寫進現有雙語／Windows 範圍。 |
 | #33／`41a775f`、#35／`0c1ed19`、#36／`9494617`、#37／`edf96c9`、#38／`044c695` | reject | 同一組 `bench/` 評測系列（+4090、+2983、+1681、+1007、+444 行）：結果資料、Python grading、Harbor runner、圖表與勘誤。本 fork 沒有 bench runtime／依賴；runner 還會擴大外部執行與憑證邊界。 | 明確成立受維護的 benchmark product，核准 Python toolchain 與 runner 安全設計後整批評估。 |
 | #41／`bbacf6d`（merge `7925452`） | reject | 現已 merge、21 檔、+1303/-99，全在 `bench/`、`tests/bench-*`；對 merge 後差量掃描長空白後程式、`eval`／`new Function(`、`global.require`、長 base64／hex，無命中。不涉及 `companion/`、canonical skills 或 Windows package gate。 | 同上。 |
