@@ -95,3 +95,29 @@
 | #40 bug(bench): preserve environment startup errors instead of reporting egress failure | 延後，由既有的上游同步工作處理 | bench 診斷錯誤，由 #41 修正；引進候選已在別處進行。 |
 
 處理後 `tools/upstream_baseline.json` 的 `reviewed_pr_through` 由 `24` 提升為 `41`，`reviewed_issue_through` 由 `26` 提升為 `40`，`reviewed_through` 與 `reviewed_release` 推進到 v0.7.4。
+
+---
+
+## 2026-10-26：複審 10-24 的上游分流（取代「由既有同步工作處理」）
+
+10-24 的分流把多數項目寫成「延後，由既有的上游同步工作處理」，但該同步工作已停止，
+沒有任何程式碼被引進，那句話不再成立。本輪重新以實際 diff 逐項判定（來源：GitHub API
+`--state all` 讀取 releases／pulls／issues／branches，與 `git diff HEAD 9a30e07`
+對本 fork 的 `companion/`、`skills/`、`package.json`、`tests/`）。上游 `master` 現為
+`7925452`（#41 已 merge，比 10-24 記錄的 `044c695` 多這一個 merge）。水位不變：
+release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，不表示採用。
+
+| 項目 | 判定 | 證據與本 fork 的對照 | 重新評估條件 |
+| --- | --- | --- | --- |
+| `v0.7.4`／#27／`9a30e07` | defer | 30 檔、+994/-63；新增 `opencode.mjs`、11 份 `opencode-skills/**`、雙 target generator 與 OpenCode 測試。`companion/` 與 `skills/` 在 `HEAD..9a30e07` 沒有任何差異，即沒有 runtime 修復可單獨移植。本 fork 的 `package.json` 只發佈 `skills/`、`pi-skills/`，沒有 OpenCode host 驗收。 | 維護者明確要求 OpenCode 支援並核准 product scope（`package.json`、generator、`opencode.mjs`、安裝文件、OpenCode 測試與 Windows package smoke）。 |
+| #29／`65a1ab4` | reject | 3 檔、+204/-2，只新增跨 host／Bash 設計說明與 README 導覽，不修正本 fork 的 Windows runtime 或治理契約。 | fork 需要公開設計文件，且內容可改寫進現有雙語／Windows 範圍。 |
+| #33／`41a775f`、#35／`0c1ed19`、#36／`9494617`、#37／`edf96c9`、#38／`044c695` | reject | 同一組 `bench/` 評測系列（+4090、+2983、+1681、+1007、+444 行）：結果資料、Python grading、Harbor runner、圖表與勘誤。本 fork 沒有 bench runtime／依賴；runner 還會擴大外部執行與憑證邊界。 | 明確成立受維護的 benchmark product，核准 Python toolchain 與 runner 安全設計後整批評估。 |
+| #41／`bbacf6d`（merge `7925452`） | reject | 現已 merge、21 檔、+1303/-99，全在 `bench/`、`tests/bench-*`；對 merge 後差量掃描長空白後程式、`eval`／`new Function(`、`global.require`、長 base64／hex，無命中。不涉及 `companion/`、canonical skills 或 Windows package gate。 | 同上。 |
+| #31 | reject | 已關閉，法文扣款申訴，與本專案無關。 | 無。 |
+| #34、#39 | monitor | 仍 open 的 bench 追蹤與結果解讀討論，沒有可移植的修復。 | bench 被納入本 fork 的產品範圍，或上游結論影響 companion 行為。 |
+| #40 | monitor | 現已關閉（由 #41 修）；只觸及未採用的 bench runner。 | fork 採用 Harbor runner。 |
+| branches | no action | `GET /repos/keli-wen/agy-staff/branches` 只回傳 `master`。checker 尚未讀 branch 水位，每輪須人工重查。 | 每次上游審查重讀。 |
+
+另有一個 Windows 處理 patch（process-table 非阻塞查詢，約 18 KB，涉及 `agy-companion.mjs`、
+`stream-worker.mjs` 與兩份測試）曾在 10-24 被提出，但從未通過原碼 Quick 門禁；上游 v0.7.4 沒有對應變更，
+`main` 上 Windows CI 為綠，也沒有可重現的使用者缺陷支持這個 runtime 改動，故不引進。

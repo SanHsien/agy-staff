@@ -80,3 +80,20 @@ python tools\check_upstream_updates.py --strict
 
 8. **紀錄決策並提交**：
    在 `docs/DECISIONS.md` 記錄本次同步引用的變更與理由，合併回 `master`。
+
+---
+
+## 4. 已完成的審查快照
+
+2026-10-26 的審查將 release、PR、issue 與 branch 分開處理；水位代表已**審閱覆蓋**，
+不表示每個上游項目都被合併。來源 endpoint、採用判斷與重新評估條件見
+[`DECISIONS.md`](DECISIONS.md#2026-10-26複審-10-24-的上游分流取代由既有同步工作處理)。
+
+- Release：`v0.7.4`／`9a30e0774de09e0815c4fc5caf456472f8fc3509` 已審閱，判定為
+  defer；此 Windows 維護型 fork 未承諾 OpenCode host。
+- PR：已逐筆審閱至 #41（皆已 merge）；issue：已逐筆審閱至 #40，包括已關閉項目。
+- Branch：上游 `master` 為 `7925452`；GitHub branches endpoint 只回傳 `master`，
+  沒有額外分支可採用。
+
+目前的 strict checker 會 fail-closed 地讀取 release、PR 與 issue 水位；branch
+沒有被它持久追蹤，因此本項是人工快照，下一輪仍須重查 branches endpoint。
