@@ -35,6 +35,7 @@ function Invoke-FreshBatch {
     $psi.FileName = "node"
     $argList = @("--test", "--test-concurrency=1") + $Files
     $psi.Arguments = ($argList | ForEach-Object { if ($_ -match '\s') { "`"$_`"" } else { $_ } }) -join " "
+    $psi.WorkingDirectory = $repoRoot
     $psi.UseShellExecute = $false
     $psi.RedirectStandardOutput = $false
     $psi.RedirectStandardError = $false
