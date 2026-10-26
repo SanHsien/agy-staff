@@ -30,6 +30,7 @@ REPO_ROOT = SCRIPT_DIR.parent
 BASELINE_PATH = SCRIPT_DIR / "upstream_baseline.json"
 UPSTREAM_REF_PREFIX = "refs/upstream-check"
 DEFAULT_DECISION_LOG = "docs/DECISIONS.md"
+TICKET_LIMIT = 500  # `gh ... list` returns the newest N and says nothing about the rest
 TRACK_MODES = ("release", "commit")
 _SEMVER_TAG_RE = re.compile(r"^v?(\d+)\.(\d+)\.(\d+)$")
 
@@ -206,7 +207,7 @@ def collect_new_tickets(baseline: dict, kind: str) -> list[dict] | None:
         result = subprocess.run(
             [
                 "gh", kind, "list", "--repo", slug, "--state", "all",
-                "--limit", "50", "--json", "number,title",
+                "--limit", str(TICKET_LIMIT), "--json", "number,title",
             ],
             capture_output=True,
             text=True,
@@ -221,10 +222,15 @@ def collect_new_tickets(baseline: dict, kind: str) -> list[dict] | None:
         items = json.loads(result.stdout)
     except ValueError:
         return None
-    return sorted(
+    fresh = sorted(
         (item for item in items if item["number"] > watermark),
         key=lambda item: item["number"],
     )
+    if len(items) >= TICKET_LIMIT and len(fresh) == len(items):
+        # The newest page is entirely above the watermark, so older unreviewed items may
+        # sit beyond it. Say "not checked" instead of reporting a short list as complete.
+        return None
+    return fresh
 
 
 def render_ticket_section(
