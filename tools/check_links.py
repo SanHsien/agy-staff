@@ -49,8 +49,22 @@ def iter_documents() -> list[Path]:
     return [path for path in documents if path.name not in SKIP_NAMES]
 
 
+def _destination(raw: str) -> str:
+    """The link destination of a `(...)` body, without an optional title.
+
+    `[a](FORK.md "Fork notes")` and `[a](<FORK.md> 'Fork notes')` both point at FORK.md; the
+    title is not part of the file name.
+    """
+    body = raw.strip()
+    if body.startswith("<"):
+        end = body.find(">")
+        return body[1:end] if end != -1 else body[1:]
+    parts = body.split(None, 1)
+    return parts[0] if parts else ""
+
+
 def _missing_relative(path: Path, target: str) -> str | None:
-    target = target.strip().strip("<>")
+    target = _destination(target)
     if not target or target.startswith(SKIP_PREFIXES):
         return None
     file_part = unquote(target.split("#", 1)[0])

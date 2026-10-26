@@ -12,7 +12,7 @@ const ROOT = path.join(HERE, '..');
 test('maintenance tool contract tests pass (offline)', () => {
   const result = spawnSync(
     'python',
-    ['-m', 'unittest', 'tests/test_check_upstream_updates.py'],
+    ['-m', 'unittest', 'tests/test_check_upstream_updates.py', 'tests/test_check_links.py'],
     {
       cwd: ROOT,
       encoding: 'utf8',
