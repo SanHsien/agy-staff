@@ -72,6 +72,21 @@ class DeclarationParsingTests(unittest.TestCase):
         self.assertEqual((package["minimum"], package["hold"]), ("4", ""))
         self.assertEqual(package["requirement"], "actions/checkout@v4")
 
+    def test_sha_pin_without_a_version_comment_has_no_floor_not_a_digit_prefix_floor(self) -> None:
+        # A bare 40-hex SHA that happens to start with digits ("3d3c42e5...") was read as
+        # the version "3", so every such pin looked a major release behind.
+        (package,) = pinned("actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1")
+        self.assertEqual(package["minimum"], "")
+        (row,) = freshness.collect_status([package], lambda _n: "7.0.1", {})
+        self.assertFalse(freshness.needs_review(row))
+
+    def test_a_non_version_comment_does_not_hide_the_version_in_a_floating_ref(self) -> None:
+        # `@v4 # keep for compat` lost its floor (the comment replaced the ref) and the
+        # report then printed the comment text as if it were the pinned version.
+        (package,) = pinned("actions/checkout@v4 # keep for compat")
+        self.assertEqual(package["minimum"], "4")
+        self.assertEqual(package["requirement"], "actions/checkout@v4")
+
     def test_workspace_siblings_are_not_registry_dependencies(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

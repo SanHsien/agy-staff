@@ -70,6 +70,7 @@ _USES_RE = re.compile(
 _HOLD_NAME_RE = re.compile(r"^\s*(?:require\s+)?[\"']?([A-Za-z0-9_.@/\-]+)")
 LOCAL_SPECS = ("workspace:", "file:", "link:", "portal:")
 _PSEUDO_VERSION_RE = re.compile(r"-\d{14}-")
+_SHA_RE = re.compile(r"[0-9a-fA-F]{40}")
 
 _CRATES_MIN_INTERVAL = 1.05  # crates.io asks crawlers for at most one request a second
 _last_crates_request = 0.0
@@ -398,6 +399,12 @@ def fetch_go_version(module: str, timeout: float = 10.0) -> str | None:
 # ------------------------------------------------------------------- GitHub Actions
 
 
+def _leading_release(text: str) -> str:
+    """The version a `v7.0.1`-style string starts with, or "" when it does not start with one."""
+    match = _RELEASE_RE.match(text.lstrip("vV"))
+    return match.group(0) if match else ""
+
+
 def parse_workflow_actions(text: str, source: str) -> list[dict[str, str]]:
     """Every `uses: owner/repo@<ref> # vX.Y.Z` declaration in a workflow file."""
     packages = []
@@ -405,14 +412,15 @@ def parse_workflow_actions(text: str, source: str) -> list[dict[str, str]]:
         action, ref, comment = match.group(1), match.group(2), (match.group(3) or "").strip()
         hold = comment[len(HOLD_MARKER) :].strip() if comment.startswith(HOLD_MARKER) else ""
         # A pinned SHA carries its declared version in the trailing comment (`# v7.0.1`);
-        # a floating tag (`@v6`) carries it in the ref itself.
-        version_source = comment if comment else ref
-        version_match = _RELEASE_RE.match(version_source.lstrip("vV")) if not hold else None
-        minimum = version_match.group(0) if version_match else ""
+        # a floating tag (`@v6`) carries it in the ref itself. A comment that names no
+        # version (`# keep for compat`) says nothing about the pin, so the ref still
+        # decides; and a 40-hex SHA is never a version, whatever digits it starts with.
+        comment_version = "" if hold else _leading_release(comment)
+        ref_version = "" if hold or _SHA_RE.fullmatch(ref) else _leading_release(ref)
+        minimum = comment_version or ref_version
+        shown = comment if hold or comment_version else ref[:12]
         packages.append(
-            _package(
-                action, minimum, f"{action}@{comment or ref[:12]}", source, "github-action", hold
-            )
+            _package(action, minimum, f"{action}@{shown}", source, "github-action", hold)
         )
     return packages
 
