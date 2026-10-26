@@ -55,7 +55,7 @@ gh repo set-default --view               # 必須顯示 SanHsien/agy-staff
 - `gh` 工具在 fork clone 下的預設 repo 會指向母 repo，必須使用 `gh repo set-default SanHsien/agy-staff` 覆蓋。
 - 建立 PR 時請明確指定：
   ```powershell
-  gh pr create --repo SanHsien/agy-staff --base master --head <分支>
+  gh pr create --repo SanHsien/agy-staff --base main --head <分支>
   ```
   建完**務必讀取輸出 URL**，確認 owner 為 `SanHsien`。
 - **唯一例外**：維護者在**當次對話**明確指示回貢上游通用 bug 修復時，才開立上游 PR。

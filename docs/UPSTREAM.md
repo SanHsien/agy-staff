@@ -79,7 +79,7 @@ python tools\check_upstream_updates.py --strict
    更新 `tools/upstream_baseline.json` 中的 `reviewed_through`、`reviewed_release`、`reviewed_date`、`reviewed_pr_through` 與 `reviewed_issue_through`。
 
 8. **紀錄決策並提交**：
-   在 `docs/DECISIONS.md` 記錄本次同步引用的變更與理由，合併回 `master`。
+   在 `docs/DECISIONS.md` 記錄本次同步引用的變更與理由，合併回 `main`。
 
 ---
 

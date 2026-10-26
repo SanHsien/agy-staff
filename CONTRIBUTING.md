@@ -12,7 +12,7 @@
    所有 Pull Request、issue 與分支操作預設僅限於本倉庫：
    ```powershell
    gh repo set-default SanHsien/agy-staff
-   gh pr create --repo SanHsien/agy-staff --base master --head <分支>
+   gh pr create --repo SanHsien/agy-staff --base main --head <分支>
    ```
    請確認建立完成後的 URL owner 為 `SanHsien`。
 
