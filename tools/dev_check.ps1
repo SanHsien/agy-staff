@@ -21,6 +21,27 @@ if ($LASTEXITCODE -ne 0) {
     throw "check:pi failed with exit code $LASTEXITCODE"
 }
 
+function Stop-ProcessTree {
+    param([System.Diagnostics.Process]$Process)
+
+    try {
+        # .NET Core (PowerShell 7) can kill the whole tree directly.
+        $Process.Kill($true)
+        return
+    } catch {}
+
+    # Windows PowerShell 5.1 runs on .NET Framework, which has no Kill(bool): the call above
+    # throws, and swallowing it used to leave `node --test` and its test processes running
+    # after a "TIMEOUT". taskkill /T walks the tree on every Windows version.
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & taskkill.exe /PID $Process.Id /T /F *> $null
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+}
+
 function Invoke-FreshBatch {
     param(
         [string]$BatchName,
@@ -46,9 +67,7 @@ function Invoke-FreshBatch {
     $duration = [math]::Round($sw.Elapsed.TotalSeconds, 1)
 
     if (-not $completed) {
-        try {
-            $proc.Kill($true)
-        } catch {}
+        Stop-ProcessTree -Process $proc
         Write-Warning "[-] Batch [$BatchName] TIMED OUT after ${TimeoutSeconds}s (incomplete, duration: ${duration}s)"
         return [PSCustomObject]@{
             Name = $BatchName
@@ -91,7 +110,7 @@ if ($Quick) {
     $batches = @(
         [PSCustomObject]@{
             Name = "Platform-Packaging"
-            Files = @("tests/windows.test.mjs", "tests/pi-packaging.test.mjs", "tests/upstream-checker.test.mjs", "tests/dependency-freshness.test.mjs", "tests/tools-python.test.mjs")
+            Files = @("tests/windows.test.mjs", "tests/pi-packaging.test.mjs", "tests/upstream-checker.test.mjs", "tests/dependency-freshness.test.mjs", "tests/tools-python.test.mjs", "tests/dev-check.test.mjs")
         },
         [PSCustomObject]@{
             Name = "Companion-Core"
