@@ -34,6 +34,7 @@ Two honest exits for a red line, neither of which is "raise the floor to go gree
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
 import re
@@ -486,7 +487,9 @@ def _get_json(
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310
             payload = json.loads(response.read().decode("utf-8"))
-    except (OSError, ValueError):
+    except (OSError, ValueError, http.client.HTTPException):
+        # HTTPException (IncompleteRead, BadStatusLine) is not an OSError: a cut
+        # connection must read as "latest unknown", not abort the whole report.
         return None
     return payload if isinstance(payload, dict | list) else None
 

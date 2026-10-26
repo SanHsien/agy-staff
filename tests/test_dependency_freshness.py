@@ -4,6 +4,7 @@ Each test names the property it protects. None of them touches the network: the
 registry lookups are injected.
 """
 
+import http.client
 import importlib.util
 import json
 import re
@@ -11,6 +12,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 _SPEC = importlib.util.spec_from_file_location(
@@ -201,6 +203,24 @@ class StatusTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(freshness.load_deferrals(path), {})
+
+
+class RegistryTransportTests(unittest.TestCase):
+    def test_truncated_response_reads_as_check_failed_not_a_crash(self) -> None:
+        # IncompleteRead is an HTTPException, not an OSError: a connection cut mid-body
+        # escaped `_get_json` and killed the whole report instead of yielding CHECK FAILED.
+        class Truncated:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_exc):
+                return False
+
+            def read(self):
+                raise http.client.IncompleteRead(b"{", 10)
+
+        with mock.patch.object(freshness.urllib.request, "urlopen", return_value=Truncated()):
+            self.assertIsNone(freshness._get_json("https://example.invalid/x"))
 
 
 class RepositoryContractTests(unittest.TestCase):
