@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parent.parent
 LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 IMAGE_PATTERN = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 HTML_SRC_PATTERN = re.compile(r"""(?is)<img[^>]+src=["']([^"']+)["']""")
+FENCE_PATTERN = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+CODE_SPAN_PATTERN = re.compile(r"(`+)(?!`)(.+?)(?<!`)\1(?!`)", re.DOTALL)
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "tel:", "#")
 SKIP_NAMES = {
     "upstream-review-report.md",
@@ -82,9 +84,32 @@ def _missing_relative(path: Path, target: str) -> str | None:
     return f"{target} → 找不到 {shown}"
 
 
+def _without_code(text: str) -> str:
+    """Drop fenced code blocks and inline code spans: links shown there are examples."""
+    kept: list[str] = []
+    fence: str | None = None
+    for line in text.splitlines(keepends=True):
+        opener = FENCE_PATTERN.match(line)
+        if fence is not None:
+            closes = (
+                opener is not None
+                and opener.group(1)[0] == fence[0]
+                and len(opener.group(1)) >= len(fence)
+                and set(line.strip()) == {fence[0]}
+            )
+            if closes:
+                fence = None
+            continue
+        if opener:
+            fence = opener.group(1)  # an unclosed fence runs to the end of the document
+            continue
+        kept.append(line)
+    return CODE_SPAN_PATTERN.sub(" ", "".join(kept))
+
+
 def check_document(path: Path) -> list[str]:
     problems: list[str] = []
-    text = path.read_text(encoding="utf-8")
+    text = _without_code(path.read_text(encoding="utf-8"))
     for pattern in (LINK_PATTERN, IMAGE_PATTERN, HTML_SRC_PATTERN):
         for match in pattern.finditer(text):
             missing = _missing_relative(path, match.group(1))

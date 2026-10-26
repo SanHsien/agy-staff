@@ -41,5 +41,30 @@ class LinkTargetTests(unittest.TestCase):
         self.assertNotIn("Gone", found[0])
 
 
+class CodeIsNotALinkTests(unittest.TestCase):
+    def test_example_links_in_fenced_code_are_not_checked(self) -> None:
+        # A doc that *shows* link syntax inside a code fence made the gate fail on the
+        # example path, which is not meant to exist.
+        fenced = "Use this:\n\n```md\n[guide](docs/NEW_GUIDE.md)\n![x](img/none.png)\n```\n"
+        self.assertEqual(problems_for(fenced), [])
+        tilde = "~~~\n[guide](docs/NEW_GUIDE.md)\n~~~\n"
+        self.assertEqual(problems_for(tilde), [])
+
+    def test_example_links_in_inline_code_are_not_checked(self) -> None:
+        self.assertEqual(problems_for("Write `[guide](docs/NEW_GUIDE.md)` like so.\n"), [])
+
+    def test_real_links_around_code_are_still_checked(self) -> None:
+        text = "[a](BEFORE.md)\n\n```\n[x](IN_FENCE.md)\n```\n\n[b](AFTER.md) and `[c](IN_SPAN.md)`\n"
+        found = problems_for(text)
+        self.assertEqual(len(found), 2, found)
+        self.assertIn("BEFORE.md", found[0])
+        self.assertIn("AFTER.md", found[1])
+
+    def test_an_unclosed_fence_hides_only_the_rest_of_the_document(self) -> None:
+        text = "[a](BEFORE.md)\n\n```\n[x](IN_FENCE.md)\n"
+        found = problems_for(text)
+        self.assertEqual(len(found), 1, found)
+        self.assertIn("BEFORE.md", found[0])
+
 if __name__ == "__main__":
     unittest.main()
