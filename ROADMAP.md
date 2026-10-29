@@ -12,7 +12,6 @@ Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`�
 | --- | --- | --- | --- | --- |
 | 查清 Full gate 的時序敏感測試是環境問題還是真缺陷 | 在高負載機器上 Jobs-Observation 失敗、Modes-Continuation 與 Regressions-Recovery 批次逾時，連乾淨 base 也失敗；沒有在閒置機器上確認過 | 在閒置機器（或遠端 CI）以 `powershell.exe -NoProfile -File tools/dev_check.ps1` 跑 Full：exit 0，或對每個失敗測試給出根因並加固；`BatchTimeoutSec`、`OverallTimeoutSec` 參數維持可設定（`tools/dev_check.ps1:4-5`） | Claude Opus | 深掃報告（2026-10-26）「本機測試證據與限制」 |
 | `check_links.py` 在 Windows 大小寫不敏感導致 `fork.md` 通過、GitHub 上失效 | gate 綠但連結在 GitHub 上會壞 | `tests/test_check_links.py` 新增：大小寫不符的連結回報失敗；`python -m unittest tests/test_check_links.py` 綠，`check_links` 對現有文件仍 exit 0 | Claude Sonnet | `tools/check_links.py`；深掃報告（2026-10-26）「刻意不修」 |
-| `pi-packaging.test.mjs` 遇 EPERM 時改為明確 skip | 目前靜默略過 symlink 斷言，輸出看起來像通過 | 無提權環境下測試輸出出現明確的 skipped 與原因；有權限環境仍實際斷言；`node --test tests/pi-packaging.test.mjs` 綠 | Claude Haiku | `tests/pi-packaging.test.mjs`；`docs/DECISIONS.md` 決策二 |
 
 ## 中期：等條件成立再做
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |

@@ -28,7 +28,7 @@ test('Pi adapters are current; canonical names and all relative resources remain
   }
 });
 
-test('generation is deterministic, copies assets, detects drift and rejects stale/symlink output', t => {
+test('generation is deterministic, copies assets, detects drift and rejects stale output', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-pi-generator-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), { recursive: true });
@@ -45,13 +45,25 @@ test('generation is deterministic, copies assets, detects drift and rejects stal
   fs.writeFileSync(unexpected, 'user edit');
   assert.throws(() => generatePiSkills({ root }), /Unexpected generated files/);
   assert.equal(fs.readFileSync(unexpected, 'utf8'), 'user edit');
-  fs.unlinkSync(unexpected);
+});
+
+test('generation rejects symlink output', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-pi-symlink-'));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), { recursive: true });
+  const source = path.join(root, 'skills', 'ask', 'SKILL.md');
+  const unexpected = path.join(root, 'pi-skills', 'obsolete.md');
+  fs.mkdirSync(path.join(root, 'pi-skills'), { recursive: true });
   try {
     fs.symlinkSync(source, unexpected);
-    assert.throws(() => generatePiSkills({ root }), /symlinks/);
   } catch (err) {
-    if (err.code !== 'EPERM') throw err;
+    if (err.code === 'EPERM') {
+      t.skip('creating symlinks requires elevated privileges (EPERM)');
+      return;
+    }
+    throw err;
   }
+  assert.throws(() => generatePiSkills({ root }), /symlinks/);
 });
 
 test('reference notices preserve frontmatter and direct output edits fail without being overwritten', t => {
