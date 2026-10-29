@@ -19,7 +19,9 @@ def problems_for(text: str, existing: tuple[str, ...] = ("FORK.md",)) -> list[st
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp).resolve()
         for name in existing:
-            (root / name).write_text("x", encoding="utf-8")
+            target = root / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("x", encoding="utf-8")
         doc = root / "README.md"
         doc.write_text(text, encoding="utf-8")
         with mock.patch.object(links, "ROOT", root):
@@ -65,6 +67,29 @@ class CodeIsNotALinkTests(unittest.TestCase):
         found = problems_for(text)
         self.assertEqual(len(found), 1, found)
         self.assertIn("BEFORE.md", found[0])
+
+
+class CaseSensitivityTests(unittest.TestCase):
+    def test_case_mismatch_is_reported(self) -> None:
+        # On Windows (case-insensitive filesystem), a link pointing to `fork.md` when the
+        # file is named `FORK.md` would previously pass the existence check but fail on GitHub.
+        found = problems_for("See [fork](fork.md).\n")
+        self.assertEqual(len(found), 1)
+        self.assertIn("fork.md", found[0])
+        self.assertIn("大小寫不符", found[0])
+
+    def test_exact_case_passes(self) -> None:
+        self.assertEqual(problems_for("See [fork](FORK.md).\n"), [])
+
+    def test_nested_path_case_mismatch_is_reported(self) -> None:
+        found = problems_for(
+            "See [decisions](docs/decisions.md).\n",
+            existing=("FORK.md", "docs/DECISIONS.md"),
+        )
+        self.assertEqual(len(found), 1)
+        self.assertIn("docs/decisions.md", found[0])
+        self.assertIn("大小寫不符", found[0])
+
 
 if __name__ == "__main__":
     unittest.main()

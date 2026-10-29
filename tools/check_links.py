@@ -9,6 +9,7 @@ CONTRIBUTING.md、README.md、README.en.md 與 docs/ 內文件的相對連結。
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -65,6 +66,47 @@ def _destination(raw: str) -> str:
     return parts[0] if parts else ""
 
 
+def _check_casing(base: Path, rel_str: str) -> tuple[bool, str | None]:
+    """Check whether every component of rel_str exists with exact casing.
+
+    On Windows, the filesystem is case-insensitive, so `path.exists()` succeeds for `fork.md`
+    even if the file is named `FORK.md` on disk. In GitHub or Linux, however, the link would 404.
+    Returns (True, actual_path) if every part matches exactly, (False, actual_path) if the target
+    exists but has case mismatch, or (False, None) if the target does not exist.
+    """
+    current = base.resolve()
+    rel_path = Path(rel_str)
+    if not rel_path.parts:
+        return (base / rel_str).resolve().exists(), ""
+    actual_parts: list[str] = []
+    has_mismatch = False
+    for part in rel_path.parts:
+        if part in (".", ""):
+            continue
+        if part == "..":
+            actual_parts.append("..")
+            current = current.parent
+            continue
+        try:
+            entries = [e.name for e in os.scandir(current)]
+        except OSError:
+            return False, None
+        if part in entries:
+            actual_parts.append(part)
+            current = current / part
+        else:
+            lower_map = {e.lower(): e for e in entries}
+            if part.lower() in lower_map:
+                has_mismatch = True
+                actual_name = lower_map[part.lower()]
+                actual_parts.append(actual_name)
+                current = current / actual_name
+            else:
+                return False, None
+    actual = "/".join(actual_parts)
+    return (not has_mismatch), actual
+
+
 def _missing_relative(path: Path, target: str) -> str | None:
     target = _destination(target)
     if not target or target.startswith(SKIP_PREFIXES):
@@ -75,8 +117,11 @@ def _missing_relative(path: Path, target: str) -> str | None:
     resolved = (path.parent / file_part).resolve()
     if not resolved.is_relative_to(ROOT):
         return f"{target} → 逃出 repo 根目錄"
-    if resolved.exists():
+    match, actual = _check_casing(path.parent, file_part)
+    if match:
         return None
+    if actual is not None:
+        return f"{target} → 大小寫不符（磁碟上為 {actual}）"
     try:
         shown = resolved.relative_to(ROOT)
     except ValueError:
