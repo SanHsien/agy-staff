@@ -10,14 +10,14 @@ Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`�
 ## 近期：可以直接動手
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 查清 Full gate 的時序敏感測試是環境問題還是真缺陷 | 在高負載機器上 Jobs-Observation 失敗、Modes-Continuation 與 Regressions-Recovery 批次逾時，連乾淨 base 也失敗；沒有在閒置機器上確認過 | 在閒置機器（或遠端 CI）以 `powershell.exe -NoProfile -File tools/dev_check.ps1` 跑 Full：exit 0，或對每個失敗測試給出根因並加固；`BatchTimeoutSec`、`OverallTimeoutSec` 參數維持可設定（`tools/dev_check.ps1:4-5`） | Claude Opus | 深掃報告（2026-10-26）「本機測試證據與限制」 |
 
 ## 中期：等條件成立再做
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
 | 同步上游新 release 或新 PR／issue | `Upstream check` workflow 在 `main` 轉為 failure（上游有未審項目，不是工具壞） | 逐筆判斷寫進 `docs/UPSTREAM.md` 與 `docs/DECISIONS.md`；`python tools/check_upstream_updates.py --strict` exit 0；完整 gate 綠後才推進 `tools/upstream_baseline.json`；PR 只打 `SanHsien/agy-staff` | Claude Sonnet | `tools/upstream_baseline.json`；`docs/DECISIONS.md` 決策一（`track: release`）；`Upstream check` workflow 結果（見現況段） |
 | 以真實 `agy` 做端到端驗收 | 維護者改用 `GEMINI_API_KEY` 或 Vertex 作為驗收通道，或另行明確決定允許 | 由維護者本人在互動環境以該通道跑一次委派，結果與日期寫進 `docs/DEVELOPMENT.md`；不得由 agent 自動呼叫 `agy -p` | 維護者 | 維護者 2026-10-27 政策；`tests/continuation.test.mjs:85`（假 agy） |
-| 採用停放的 Windows 非阻塞 CIM 行程查詢 patch | 在閒置機器或 CI 重現 worker 啟動被 CIM 查詢拖慢，或有使用者回報 | 重現步驟與修前耗時記錄；修正後同情境耗時下降；cancel 與清理識別測試全綠；patch 由維護者另存，完整 SHA-256 `48C72715FFFE8D8B85A98DE78C28AAB3CC80C6A04433C8D11ADB74832D21713B`；拿不到 patch 時從頭重寫 | Claude Opus | 接續開發報告（2026-10-26）「找到的未完成線索」 |
+| 查清 Full gate 的時序敏感測試是環境問題還是真缺陷 | 在高負載機器上 Jobs-Observation 失敗、Modes-Continuation 與 Regressions-Recovery 批次逾時，連乾淨 base 也失敗；沒有在閒置機器上確認過 | 在閒置機器（或遠端 CI）以 `powershell.exe -NoProfile -File tools/dev_check.ps1` 跑 Full：exit 0，或對每個失敗測試給出根因並加固；`BatchTimeoutSec`、`OverallTimeoutSec` 參數維持可設定（`tools/dev_check.ps1:4-5`） | Claude Opus | 深掃報告（2026-10-26）「本機測試證據與限制」；2026-10-31：streaming hard-deadline 根因為 `companion/stream-worker.mjs:80` 同步 CIM 查詢（測試 fake 已改 20000ms）；同檔 cancel 測試（`tests/streaming.test.mjs:76`）在負載下仍偶發 `1 !== 0` |
+| 採用停放的 Windows 非阻塞 CIM 行程查詢 patch | 在閒置機器或 CI 重現 worker 啟動被 CIM 查詢拖慢，或有使用者回報 | 重現步驟與修前耗時記錄；修正後同情境耗時下降；cancel 與清理識別測試全綠；patch 由維護者另存，完整 SHA-256 `48C72715FFFE8D8B85A98DE78C28AAB3CC80C6A04433C8D11ADB74832D21713B`；拿不到 patch 時從頭重寫 | Claude Opus | 接續開發報告（2026-10-26）「找到的未完成線索」。2026-10-31 本機重現：hard-deadline 測試 `--timeout 800ms`、fake 5000ms，3/3 以 exit 0 結束，硬期限超時 ≥4.2s，根因是 `companion/stream-worker.mjs:80` 的同步 CIM 查詢 |
 | 評估引進 OpenCode host 與 bench | 維護者核准產品範圍，要把這些納入 fork | 範圍決定寫進 `docs/DECISIONS.md`；引進後 `dev_check` Full 與 CI 綠，README 雙語同步 | 維護者 | `docs/UPSTREAM.md:93`（defer，未承諾 OpenCode host） |
 
 ## 刻意不做

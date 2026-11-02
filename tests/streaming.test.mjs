@@ -48,7 +48,8 @@ test('soft expiry includes observation; independent observers and interrupted wa
 
 test('hard deadline keeps init metadata and recovery configuration despite unrelated state.last', async () => {
   const sb = sandbox('hard-deadline');
-  const id = jobIdOf(run(sb, ['review', '--restricted', '--model', 'gemini-3.8-flash-high', '--timeout', '800ms', '--prompt', 'review this'], { FAKE_AGY_SLEEP_MS: '5000' }).stdout);
+  // 20000 是為了讓 fake 在 Windows 慢清理期間仍存活：800ms 硬期限在 Windows 上實際超時 >=4.2 秒（產品側同步 CIM 查詢，已列路線圖）。
+  const id = jobIdOf(run(sb, ['review', '--restricted', '--model', 'gemini-3.8-flash-high', '--timeout', '800ms', '--prompt', 'review this'], { FAKE_AGY_SLEEP_MS: '20000' }).stdout);
   const result = run(sb, ['wait', id]);
   assert.equal(result.code, 5, result.stdout + result.stderr);
   assert.match(result.stdout, /hard_timeout/);
