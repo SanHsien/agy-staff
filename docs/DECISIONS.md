@@ -121,3 +121,19 @@ release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，�
 另有一個 Windows 處理 patch（process-table 非阻塞查詢，約 18 KB，涉及 `agy-companion.mjs`、
 `stream-worker.mjs` 與兩份測試）曾在 10-24 被提出，但從未通過原碼 Quick 門禁；上游 v0.7.4 沒有對應變更，
 `main` 上 Windows CI 為綠，也沒有可重現的使用者缺陷支持這個 runtime 改動，故不引進。
+
+
+## 2026-11-02：上游 v0.8.0（`9ddec3e`）、PR #42–#47、issue #46
+
+上游 `v0.8.0` 是 `9a30e07` 之後的第 9 筆 commit（release 軸只看到該 tag）；`master` 現為 `07ab3d1`，其間只多 #47（只動 `bench/` 與 `tests/bench-*`）。取各項目目前的 head 讀 diff，對 `9a30e07..9ddec3e` 與 #44／#45／#47 的新增行掃隱藏內容（長空白後程式、`eval`／`new Function(`、`globalThis`、長 base64／hex），只命中 `bench` 內一行有來源的 `AGY_SHA512=` 校驗值，無惡意內容。
+
+| 項目 | 判定 | 證據與本 fork 的對照 | 重新評估條件 |
+| --- | --- | --- | --- |
+| #43／`9ddec3e`（v0.8.0） | defer（排入 ROADMAP 近期表） | 38 檔、+2348／-1041，其中產品檔只有 `skills/{jobs,lead,staffer}/SKILL.md`、`templates/{implement,research,review,staffer}.md`、新測試 `tests/worker-templates.test.mjs`（共約 +130 行）；其餘是 `bench/`、`opencode-skills/`、版本號與發行素材。本 fork 的這 7 個檔與 `9a30e07` 逐位元組相同，可乾淨套用。不是缺陷修正，而是依上游 bench 結果改寫 worker 行為（禁止轉派、`## Conflicts with the task`、`Status:` 首行），影響每個委派任務，且本 fork 受 2026-10-27 政策限制不能用真 `agy` 驗證成效。 | 維護者核准採用 bench 導向的範本調整，或使用者回報 worker 轉派／無狀態列問題。 |
+| #42／`bbc38e0`、#29／`65a1ab4`、#33／#35／#36／#37／#38／#41 | reject | 全是 `bench/` 結果、圖表、runner、README 導覽與 `docs/DESIGN.md`；`HEAD` 沒有 `bench/`，與 2026-10-26 同系列的裁決一致。 | 採用 Harbor runner 或 bench 進入本 fork 產品範圍。 |
+| #47／`b7d26c1`（已 merge）、issue #46（已關閉） | reject | 7 檔、+90／-17，只動 `bench/scripts/*`、`bench/REPRODUCE.md`、`tests/bench-*`；本 fork 沒有這些檔，缺陷不存在。 | 同上。 |
+| #44（speed probe，open，`9c726aa`） | monitor | 17 檔、+494／-7，新增 `companion/speed.mjs` 與 `agy-companion.mjs` 子命令，屬新功能；未合併。 | head 變動或狀態離開 open（`monitored` 會報）；合併後隨 release 再審。 |
+| #45（account relay，open，`2b1a830`） | monitor | 22 檔、+1201／-16，新增 `companion/relay.mjs`、`pool.mjs` 與跨 `agy-switch` 帳號輪替；牽涉帳號與憑證，且與維護者禁止第三方 agent 經 `agy -p` 使用個人訂閱的政策相衝，未合併。 | 同上；採用前須維護者明確核准。 |
+| branches | no action | `GET /repos/keli-wen/agy-staff/branches` 本輪未重查分支軸（檢查器未啟用），沿用 10-26 結果。 | 每次上游審查重讀。 |
+
+水位：`reviewed_through` `9a30e07` → `9ddec3e`、`reviewed_release` `v0.7.4` → `v0.8.0`、`reviewed_pr_through` 41 → 47、`reviewed_issue_through` 40 → 46、`reviewed_date` 2026-11-02；#44、#45 釘在 `monitored`。本輪未採用任何上游檔案，故不需動 `package.json`／plugin 版本。
