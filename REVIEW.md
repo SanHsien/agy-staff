@@ -37,7 +37,7 @@
 
 test at tests\pi-packaging.test.mjs:139:1
 ✖ actual npm archive contains resources and runs ask + detached job collection outside checkout (13424.8291ms)
-  Error: tar -xzf C:\Users\SanHsien\AppData\Local\Temp\agy-staff-test-pi-pack-Nahm6w\agy-staff-0.7.3.tgz -C C:\Users\SanHsien\AppData\Local\Temp\agy-staff-test-pi-pack-Nahm6w\extracted failed (2):
+  Error: tar -xzf %TEMP%\agy-staff-test-pi-pack-Nahm6w\agy-staff-0.7.3.tgz -C %TEMP%\agy-staff-test-pi-pack-Nahm6w\extracted failed (2):
 
   tar (child): Cannot connect to C: resolve failed
 
