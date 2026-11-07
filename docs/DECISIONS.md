@@ -137,3 +137,19 @@ release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，�
 | branches | no action | `GET /repos/keli-wen/agy-staff/branches` 本輪未重查分支軸（檢查器未啟用），沿用 10-26 結果。 | 每次上游審查重讀。 |
 
 水位：`reviewed_through` `9a30e07` → `9ddec3e`、`reviewed_release` `v0.7.4` → `v0.8.0`、`reviewed_pr_through` 41 → 47、`reviewed_issue_through` 40 → 46、`reviewed_date` 2026-11-02；#44、#45 釘在 `monitored`。本輪未採用任何上游檔案，故不需動 `package.json`／plugin 版本。
+
+## 2026-11-08：採用 v0.8.0 worker 範本；上游 v0.8.2（`d90bac7`）、PR #44–#53、issue #48–#51
+
+**採用 v0.8.0 的 worker 範本與技能文字（取代 2026-11-02 的 defer）。** 維護者授權艦隊規劃長決定。理由：變更內容是行為規則（worker 不再轉派、與任務前提衝突時回報 `## Conflicts with the task`、結果首行 `Status:`），不碰 companion 程式；本 fork 的 7 個檔與 `9a30e07` 逐位元組相同，`git apply --check` 乾淨；新增的 `tests/worker-templates.test.mjs` 把四個 persona 的渲染結果釘住，4/4 通過；`pi-skills/` 由 `npm run generate:pi` 重產（3 檔變動）。沒有實際呼叫 `agy`（遵守 2026-10-27 政策），成效無法用真 `agy` 量測，這是已知限制。不採用 `opencode-skills/`、版本號、bench、發行素材。重新評估條件：維護者回報 worker 行為變差，則依 `git diff` 回退這 7 個檔與測試。
+
+對 `9ddec3e..d90bac7` 非 `bench/` 的新增行掃隱藏內容（`eval`／`new Function(`／`globalThis`／長 base64／64 位 hex／`curl`／`child_process`），無命中惡意內容（唯一命中是文件中的 `agy` 版本建議字串）。
+
+| 項目 | 判定 | 證據與本 fork 的對照 | 重新評估條件 |
+| --- | --- | --- | --- |
+| #44（speed probe）、#45（account relay） | reject | 2026-11-08 `gh api repos/keli-wen/agy-staff/pulls/{44,45}`：兩者皆 `closed`、`merged=false`；#45 還與 2026-10-27 禁止第三方 agent 經 `agy -p` 使用個人訂閱的政策相衝。 | 上游重開或以新 PR 重提。 |
+| #47／`07ab3d1` | reject（沿用 11-02） | 只動 `bench/` 與 `tests/bench-*`，本 fork 沒有。 | 同 11-02。 |
+| #49／`029eb7b`、issue #48（v0.8.1，保留原生 AGY 診斷） | defer（排入 ROADMAP 近期表） | `companion/{agy-companion,observation,stream-worker}.mjs` 共 +397／-146，另新增 `tests/native-result.test.mjs`（284 行）；是 `agy` 錯誤中繼資料與完成原因的保留，屬 companion 行為，需要對照 `agy` 版本（上游建議 v1.4.11 以上）且不能用真 `agy` 驗證，所以必須在假 `agy` 上補測。 | 採用前完成假 `agy` 測試並跑 Full gate。 |
+| #52／`883003a`、issue #51（v0.8.1，共用 persona 規則與僅用 job ID 的接續） | defer（排入 ROADMAP 近期表） | 51 檔、+856／-267，新增 `templates/persona-skill-rules.md` 與 `scripts/generate-skills.mjs` 的產生邏輯，並改變接續語意（只認 job ID）；會取代本輪剛採用的 v0.8.0 文字，所以應與 #49 一起一次性移植，避免兩次改同一批檔。 | 同上。 |
+| #53／`d90bac7`、issue #50（v0.8.2，`agy:brain`） | reject | 新增 `skills/brain/`、`templates/brain.md` 與 companion 子命令，是「外部大腦」協調角色，屬新產品範圍；本 fork 未承諾這個角色。 | 維護者核准把 brain 納入 fork。 |
+
+水位：`reviewed_through` `9ddec3e` → `d90bac7`、`reviewed_release` `v0.8.0` → `v0.8.2`、`reviewed_pr_through` 47 → 53、`reviewed_issue_through` 46 → 51、`reviewed_date` 2026-11-08；`monitored` 清空（#44、#45 已結案未合併）。本輪採用了上游 skills／templates 文字但不改 `package.json`／plugin 版本（版本號屬上游發行軸）。

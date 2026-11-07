@@ -127,6 +127,10 @@ if ($Quick) {
         [PSCustomObject]@{
             Name = "Regressions-Recovery"
             Files = @("tests/recovery-regressions.test.mjs", "tests/issue-regressions.test.mjs")
+        },
+        [PSCustomObject]@{
+            Name = "Worker-Templates"
+            Files = @("tests/worker-templates.test.mjs")
         }
     )
 

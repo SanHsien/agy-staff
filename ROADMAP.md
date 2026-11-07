@@ -5,12 +5,12 @@
 
 ## 現況
 
-Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`），把 Google Antigravity CLI（`agy`）當「小弟」委派的外掛，支援 Claude Code、Codex CLI、Pi；與上游無共同祖先是 2026-10-24 單一 commit 的已知結果，不是缺陷。審查水位在 `tools/upstream_baseline.json`（release v0.7.4、PR 41、issue 40）。健康：2026-10-29 查到 open PR 0、Dependabot 與 Code scanning 告警各 0，`CI`、`CodeQL`、`Dependency freshness`、`Generated skills consistency`、`Upstream check` 在 `main` 最近一次皆 success；issues 在此 repo 停用，所以 issue 數是「未查到」；沒有 release（2026-10-29 `gh` 查詢）。**使用限制**：維護者 2026-10-27 政策禁止第三方 agent 經 `agy -p` 使用 Antigravity 個人訂閱，因此本 repo 的測試一律用假的 `agy`（`tests/continuation.test.mjs:85` 的 `FAKE_AGY`），任何 agent 都不得為了驗證而實際呼叫 `agy`。
+Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`），把 Google Antigravity CLI（`agy`）當「小弟」委派的外掛，支援 Claude Code、Codex CLI、Pi；與上游無共同祖先是 2026-10-24 單一 commit 的已知結果，不是缺陷。審查水位在 `tools/upstream_baseline.json`（release v0.8.2、PR 53、issue 51，2026-11-08 審查）。健康：2026-11-08 查：Dependabot 與 Code scanning open 告警各 0（`gh api repos/SanHsien/agy-staff/{dependabot,code-scanning}/alerts?state=open`）；2026-10-29 查到 open PR 0、Dependabot 與 Code scanning 告警各 0，`CI`、`CodeQL`、`Dependency freshness`、`Generated skills consistency`、`Upstream check` 在 `main` 最近一次皆 success；issues 在此 repo 停用，所以 issue 數是「未查到」；沒有 release（2026-10-29 `gh` 查詢）。**使用限制**：維護者 2026-10-27 政策禁止第三方 agent 經 `agy -p` 使用 Antigravity 個人訂閱，因此本 repo 的測試一律用假的 `agy`（`tests/continuation.test.mjs:85` 的 `FAKE_AGY`），任何 agent 都不得為了驗證而實際呼叫 `agy`。
 
 ## 近期：可以直接動手
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 評估並移植上游 v0.8.0 的 worker 範本與 lead／jobs／staffer 技能文字 | 這是 bench v1 後上游唯一動到產品檔的變更；本 fork 這 7 個檔與 v0.7.4 逐位元組相同，可乾淨套用，但會改變所有 worker 的行為（不再轉派、衝突回報、`Status:` 首行），屬產品主流程，2026-11-02 審查時超過一小時未做 | 取 `9a30e07..9ddec3e` 對 `skills/{jobs,lead,staffer}/SKILL.md`、`templates/{implement,research,review,staffer}.md`、`tests/worker-templates.test.mjs` 的內容（`pi-skills/` 由 generator 產生，不手改）；`Generated skills consistency` 與 `tools/dev_check.ps1` 綠；不引入 `opencode-skills/`、版本號與 bench；不得實際呼叫 `agy` | Claude Opus | `docs/DECISIONS.md` 2026-11-02 條目；`git diff 9a30e07 9ddec3e -- skills templates` |
+| 移植上游 v0.8.1 的原生診斷保留（#49／#48）與共用 persona 規則、僅用 job ID 的接續（#52／#51） | 2026-11-08 已採用 v0.8.0 範本文字，但 #52 會再改同一批技能與範本並動接續語意，應一次移植；#49 保留 `agy` 原生錯誤與完成原因，需要假 `agy` 上的測試 | 取 `d90bac7` 範圍內 `companion/{agy-companion,observation,stream-worker}.mjs`、`scripts/generate-skills.mjs`、`templates/persona-skill-rules.md`、`skills/*`、`tests/{native-result,shared-persona-rules,continuation}.test.mjs` 等；不取 `skills/brain`、`opencode-skills/`、版本號、bench；`tools/dev_check.ps1` Full 綠；不得實際呼叫 `agy` | Claude Opus | `docs/DECISIONS.md` 2026-11-08 條目；`git diff 9ddec3e d90bac7 --stat -- companion skills templates tests`（上游 clone） |
 
 ## 中期：等條件成立再做
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
