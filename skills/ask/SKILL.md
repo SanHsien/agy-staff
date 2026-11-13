@@ -1,13 +1,13 @@
 ---
 name: ask
 description: Ask Google's Antigravity CLI (agy staffer, fast Gemini) a cheap one-shot question - the fast zero-tool mode and the post-install smoke test. Use when the user says /agy:ask, "ask agy", "quick second opinion from agy", or right after installing to verify the plugin works.
-argument-hint: '[--model <id>|--effort low|medium|high] [--timeout <dur>] "question"'
+argument-hint: '[--model <id>|--effort low|medium|high|xhigh] [--timeout <dur>] "question"'
 allowed-tools: Bash(node:*)
 ---
 
 # agy ask
 
-The quick mode: one question in, one answer out, ~3 seconds on the default `gemini-3.8-flash-low`. Zero tools by design (restricted profile, question-only prompt), so it needs no setup and works on a fresh install — run it first as the smoke test: `ask --prompt "reply with OK"`.
+The quick mode: one question in, one answer out, ~3 seconds on the default `gemini-4-hydrogen-low`. Zero tools by design (restricted profile, question-only prompt), so it needs no setup and works on a fresh install — run it first as the smoke test: `ask --prompt "reply with OK"`.
 
 ask is the only persona that runs in the foreground: the call blocks, records an `ask-...` job ID (emitted on stderr as `job=ask-...` and listed by `status`), and returns the answer on stdout. staffer, researcher, reviewer, and implementer instead return a background job id (see the jobs skill, `../jobs/SKILL.md`).
 
@@ -19,6 +19,11 @@ ask is the only persona that runs in the foreground: the call blocks, records an
 - Start fresh for a different task or persona, an independent opinion, or an explicit fresh start. Carry relevant findings and artifact paths into the new brief.
 - Pass the user's task and explicit authorizations verbatim. On follow-up, add decisions and constraints from the host chat that the worker has not seen. Continuation does not expand authorization.
 - Run the companion unsandboxed; in Codex, request escalated execution. Follow `../jobs/SKILL.md` for collection and recovery. After an execution timeout, obtain explicit user confirmation before continuing or restarting.
+
+## Model selection
+
+- Worker defaults use Gemini 4 Hydrogen. `--effort low|medium|high|xhigh` selects its tier; `--model` accepts `hydrogen`, `carbon`, `argon`, `flash`, `pro`, or an effort-suffixed ID. Carbon and Argon have low/medium/high tiers; requesting xhigh on those families selects high with a warning.
+- `flash` remains an explicit Gemini 3.8 Flash alias. Continuation keeps the recorded model unless overridden. Unavailable models fail with diagnostics and compatible recommendations; do not automatically retry or switch models.
 <!-- END SHARED PERSONA RULES -->
 
 ## Locating the companion
@@ -32,7 +37,7 @@ node "<skill-dir>/../../companion/agy-companion.mjs" ask [flags] --prompt "quest
 ## Flags (all optional)
 
 - `--prompt <text>` / `--prompt-file <path>` / `--stdin` — the question, from exactly one of these three sources. Use file/stdin for a long question.
-- `--model <id>` or `--effort low|medium|high` — default model is `gemini-3.8-flash-low`.
+- `--model <id>` or `--effort low|medium|high|xhigh` — default model is `gemini-4-hydrogen-low`.
 - `--timeout <dur>` — default 2m.
 
 For a follow-up to an earlier `ask` run, use `continue --job <id> --prompt "question"` with the `ask-...` job ID recorded on stderr (or listed by `status`). A continued `ask` job stays synchronous in the foreground.

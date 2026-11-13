@@ -32,8 +32,8 @@
  *
  * Uniform flags:
  *   --job <id>            (continue) continue a specific job with its original persona/configuration
- *   --model <id>          explicit agy model id (overrides --effort)
- *   --effort <l|m|h>      low|medium|high → gemini-3.8-flash-<effort>
+ *   --model <id>          explicit agy model id or family alias (overrides --effort)
+ *   --effort <tier>       low|medium|high|xhigh → gemini-4-hydrogen-<effort>
  *   --restricted          hardening opt-in: keep agy's permission enforcement
  *                         on (wants setup's evidence-gathering allowlist)
  *   --unrestricted        pass --dangerously-skip-permissions (already the
@@ -113,11 +113,11 @@ const MODES = ['staffer', 'research', 'review', 'implement', 'ask'];
 
 const DEFAULTS = {
   model: {
-    staffer: 'gemini-3.8-flash-medium',
-    research: 'gemini-3.8-flash-high',
-    review: 'gemini-3.8-flash-medium',
-    implement: 'gemini-3.8-flash-high',
-    ask: 'gemini-3.8-flash-low',
+    staffer: 'gemini-4-hydrogen-medium',
+    research: 'gemini-4-hydrogen-high',
+    review: 'gemini-4-hydrogen-medium',
+    implement: 'gemini-4-hydrogen-high',
+    ask: 'gemini-4-hydrogen-low',
   },
   // Every tool-using mode is unrestricted by default: headless agy denies
   // unlisted tool calls, so a restricted default made research/review come
@@ -137,24 +137,40 @@ const DEFAULTS = {
 };
 
 // agy only accepts effort-suffixed model ids; bare family names are rejected
-// with status ERROR ("--model gemini-3.8-flash requires --effort").
-// Known ids from `agy models` (v1.1.13):
+// with status ERROR ("--model gemini-4-hydrogen requires --effort").
+// Known ids from `agy models`:
 const KNOWN_MODELS = new Set([
+  'gemini-4-carbon-high', 'gemini-4-carbon-medium', 'gemini-4-carbon-low',
+  'gemini-4-argon-high', 'gemini-4-argon-medium', 'gemini-4-argon-low',
+  'gemini-4-hydrogen-xhigh', 'gemini-4-hydrogen-high', 'gemini-4-hydrogen-medium', 'gemini-4-hydrogen-low',
   'gemini-3.8-flash-high', 'gemini-3.8-flash-medium', 'gemini-3.8-flash-low',
   'gemini-3.7-flash-high', 'gemini-3.7-flash-medium', 'gemini-3.7-flash-low',
   'gemini-3.6-flash-high', 'gemini-3.6-flash-medium', 'gemini-3.6-flash-low',
   'gemini-3.5-flash-high', 'gemini-3.5-flash-medium', 'gemini-3.5-flash-low',
   'gemini-3.1-pro-high', 'gemini-3.1-pro-low',
+  'claude-opus-5-5-low', 'claude-opus-5-5-medium', 'claude-opus-5-5-high',
+  'claude-sonnet-5-5-low', 'claude-sonnet-5-5-medium', 'claude-sonnet-5-5-high',
   'claude-sonnet-4-6', 'claude-opus-4-6-thinking', 'gpt-oss-120b-medium',
 ]);
 const MODEL_FAMILIES = {
+  'gemini-4-carbon': ['low', 'medium', 'high'],
+  'gemini-4-argon': ['low', 'medium', 'high'],
+  'gemini-4-hydrogen': ['low', 'medium', 'high', 'xhigh'],
   'gemini-3.8-flash': ['low', 'medium', 'high'],
   'gemini-3.7-flash': ['low', 'medium', 'high'],
   'gemini-3.6-flash': ['low', 'medium', 'high'],
   'gemini-3.5-flash': ['low', 'medium', 'high'],
   'gemini-3.1-pro': ['low', 'high'],
+  'claude-opus-5-5': ['low', 'medium', 'high'],
+  'claude-sonnet-5-5': ['low', 'medium', 'high'],
 };
-const MODEL_ALIASES = { flash: 'gemini-3.8-flash', pro: 'gemini-3.1-pro' };
+const MODEL_ALIASES = {
+  carbon: 'gemini-4-carbon',
+  argon: 'gemini-4-argon',
+  hydrogen: 'gemini-4-hydrogen',
+  flash: 'gemini-3.8-flash',
+  pro: 'gemini-3.1-pro',
+};
 
 /** Normalize a user-supplied --model value to an id agy accepts, or die
  *  pre-flight with a helpful message. Never lets a bare family reach agy. */
@@ -173,11 +189,11 @@ function normalizeModel(raw, effort) {
     return `${name}-${e}`;
   }
   // future-tolerance: pass through anything already effort-suffixed
-  if (/-(low|medium|high|thinking)$/.test(name)) return name;
+  if (/-(low|medium|high|xhigh|thinking)$/.test(name)) return name;
   die(
     `unknown model id "${raw}". agy needs effort-suffixed ids, e.g. ` +
-      `gemini-3.8-flash-low|medium|high, gemini-3.1-pro-low|high. ` +
-      `Aliases accepted here: "flash" (gemini-3.8-flash), "pro" (gemini-3.1-pro), ` +
+      `gemini-4-carbon-low|medium|high, gemini-4-argon-low|medium|high, gemini-4-hydrogen-low|medium|high|xhigh, gemini-3.8-flash-low|medium|high, gemini-3.1-pro-low|high. ` +
+      `Aliases accepted here: "carbon" (gemini-4-carbon), "argon" (gemini-4-argon), "hydrogen" (gemini-4-hydrogen), "flash" (gemini-3.8-flash), "pro" (gemini-3.1-pro), ` +
       `optionally combined with --effort. Run \`agy models\` for the full list.`
   );
 }
@@ -607,10 +623,10 @@ function queryAgyModels() {
     if (!stdout) {
       return { ok: false, error: 'empty output from `agy models`' };
     }
-    const lines = stdout.split('\n').map((l) => l.trim()).filter(Boolean);
+    const lines = stdout.split(/[\r\n]+/).map((l) => l.trim()).filter(Boolean);
     const models = [];
     for (const line of lines) {
-      if (/^fetching/i.test(line)) continue;
+      if (/^(?:[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]\s*)?fetching\b/i.test(line)) continue;
       const parts = line.split(/\s+/);
       const id = parts[0];
       const desc = parts.slice(1).join(' ');
@@ -628,23 +644,29 @@ function queryAgyModels() {
 }
 
 function recommendCompatibleModel(requestedModel, availableModelIds) {
-  const effortMatch = requestedModel ? requestedModel.match(/-(low|medium|high)$/) : null;
+  const effortMatch = requestedModel ? requestedModel.match(/-(low|medium|high|xhigh)$/) : null;
   const effort = effortMatch ? effortMatch[1] : null;
+  const isFourSeries = /^gemini-4-(carbon|argon)-/.test(requestedModel || '');
 
   if (effort) {
     const sameEffort = availableModelIds.filter((id) => id.endsWith(`-${effort}`));
     if (sameEffort.length > 0) {
-      const flashOrder = [
+      const preferredOrder = [
+        ...(isFourSeries ? [`gemini-4-carbon-${effort}`, `gemini-4-argon-${effort}`] : []),
+        `gemini-4-hydrogen-${effort}`,
         `gemini-3.8-flash-${effort}`,
         `gemini-3.7-flash-${effort}`,
         `gemini-3.6-flash-${effort}`,
         `gemini-3.5-flash-${effort}`,
       ];
-      for (const candidate of flashOrder) {
+      for (const candidate of preferredOrder) {
         if (sameEffort.includes(candidate) && candidate !== requestedModel) {
           return candidate;
         }
       }
+      const otherHydrogen = sameEffort.find((id) => id.includes('hydrogen') && id !== requestedModel);
+      if (otherHydrogen) return otherHydrogen;
+
       const otherFlash = sameEffort.find((id) => id.includes('flash') && id !== requestedModel);
       if (otherFlash) return otherFlash;
 
@@ -659,6 +681,22 @@ function recommendCompatibleModel(requestedModel, availableModelIds) {
     }
   }
 
+  if (isFourSeries) {
+    for (const prefix of ['gemini-4-carbon-', 'gemini-4-argon-']) {
+      const match = availableModelIds.find((id) => id.startsWith(prefix) && id !== requestedModel);
+      if (match) return match;
+    }
+  }
+
+  if (effort === 'xhigh') {
+    for (const candidate of ['gemini-4-hydrogen-high', 'gemini-3.8-flash-high', 'gemini-3.7-flash-high']) {
+      if (availableModelIds.includes(candidate) && candidate !== requestedModel) return candidate;
+    }
+  }
+
+  const anyHydrogen = availableModelIds.find((id) => id.includes('hydrogen') && id !== requestedModel);
+  if (anyHydrogen) return anyHydrogen;
+
   const anyFlash = availableModelIds.find((id) => id.includes('flash') && id !== requestedModel);
   if (anyFlash) return anyFlash;
 
@@ -667,16 +705,18 @@ function recommendCompatibleModel(requestedModel, availableModelIds) {
 
 function isUnsupportedModelError(errText) {
   if (!errText) return false;
-  if (/auth|login|credential|unauthorized|401|403/i.test(errText)) return false;
-  if (/quota|rate.?limit|resource.?exhausted|429/i.test(errText)) return false;
-  if (/network|econnrefused|enotfound|fetch failed|socket|eai_again/i.test(errText)) return false;
-  if (/requires --effort/i.test(errText)) return false;
+  const header = errText.replace(/\n\s*Available models:[\s\S]*$/i, '');
+  if (/invalid model selection[^\n]*is not recognized as a known model/i.test(header)) return true;
+  if (/\b(?:auth|login|credential|unauthorized|401|403)\b/i.test(header)) return false;
+  if (/\b(?:quota|429)\b|rate.?limit|resource.?exhausted/i.test(header)) return false;
+  if (/network|econnrefused|enotfound|fetch failed|socket|eai_again/i.test(header)) return false;
+  if (/requires --effort/i.test(header)) return false;
   return (
-    /not recognized as a known model/i.test(errText) ||
-    /unknown model/i.test(errText) ||
-    /unsupported model/i.test(errText) ||
-    /invalid model selection/i.test(errText) ||
-    /model .* (not found|is not supported|is not available|is not recognized)/i.test(errText)
+    /not recognized as a known model/i.test(header) ||
+    /unknown model/i.test(header) ||
+    /unsupported model/i.test(header) ||
+    /invalid model selection/i.test(header) ||
+    /model .* (not found|is not supported|is not available|is not recognized)/i.test(header)
   );
 }
 
@@ -691,7 +731,7 @@ function handleUnsupportedModel({ requestedModel, errText, originalError, convNo
     msg +=
       `Model discovery via \`agy models\` failed (${discovery.error}).\n` +
       `Please run \`agy models\` to check available models.\n` +
-      `Updating agy is preferred to use the latest default (gemini-3.8-flash).`;
+      `Updating agy is preferred to use the latest default (gemini-4-hydrogen).`;
     die(msg + (convNote || ''));
   }
 
@@ -706,7 +746,7 @@ function handleUnsupportedModel({ requestedModel, errText, originalError, convNo
   if (best) {
     msg += `Best same-effort compatible recommendation: --model ${best}\n`;
   }
-  msg += `Updating agy is preferred to use the latest default (gemini-3.8-flash).`;
+  msg += `Updating agy is preferred to use the latest default (gemini-4-hydrogen).`;
   die(msg + (convNote || ''));
 }
 
@@ -876,7 +916,7 @@ function triageResult({ payload, stderr, exit, agy }, mode, profile, profileSour
     const hints = [];
     const nativeError = agy.errors?.at(-1);
     if (!nativeError && /model|effort/i.test(errText)) {
-      hints.push('invalid model id (agy needs effort-suffixed ids, e.g. gemini-3.8-flash-low — run `agy models`)');
+      hints.push('invalid model id (agy needs effort-suffixed ids, e.g. gemini-4-hydrogen-low — run `agy models`)');
     }
     if (nativeError ? ['UNAUTHENTICATED', 'PERMISSION_DENIED'].includes(nativeError.status) : /auth|login|credential|unauthorized|401|403/i.test(errText)) {
       hints.push('expired auth (run `agy` interactively once to re-login)');
@@ -983,14 +1023,14 @@ function resolveRun(mode, opts, priorJob = null) {
   }
 
   // model / effort
-  if (opts.effort && !['low', 'medium', 'high'].includes(opts.effort)) {
-    die('--effort must be low|medium|high');
+  if (opts.effort && !['low', 'medium', 'high', 'xhigh'].includes(opts.effort)) {
+    die('--effort must be low|medium|high|xhigh');
   }
   let model;
   if (opts.model) {
     model = normalizeModel(opts.model, opts.effort);
   } else if (opts.effort) {
-    model = `gemini-3.8-flash-${opts.effort}`;
+    model = `gemini-4-hydrogen-${opts.effort}`;
   } else {
     model = DEFAULTS.model[mode];
   }

@@ -1,11 +1,11 @@
 {
   "repo": "https://github.com/keli-wen/agy-staff.git",
   "branch": "master",
-  "reviewed_through": "d90bac7af2cf38efbac76531e013a838b4513de9",
-  "reviewed_release": "v0.8.2",
-  "reviewed_date": "2026-11-08",
-  "reviewed_pr_through": 53,
-  "reviewed_issue_through": 51,
+  "reviewed_through": "2b78b4548070af6b8ff154379aecfca6b6762907",
+  "reviewed_release": "v0.9.2",
+  "reviewed_date": "2026-11-13",
+  "reviewed_pr_through": 60,
+  "reviewed_issue_through": 59,
   "track": "release",
   "decision_log": "docs/DECISIONS.md",
   "monitored": []

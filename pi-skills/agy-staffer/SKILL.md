@@ -21,6 +21,11 @@ staffer is also the route to agy-native tools no specialist covers — notably *
 - Start fresh for a different task or persona, an independent opinion, or an explicit fresh start. Carry relevant findings and artifact paths into the new brief.
 - Pass the user's task and explicit authorizations verbatim. On follow-up, add decisions and constraints from the host chat that the worker has not seen. Continuation does not expand authorization.
 - Run the companion unsandboxed; in Codex, request escalated execution. Follow `../agy-jobs/SKILL.md` for collection and recovery. After an execution timeout, obtain explicit user confirmation before continuing or restarting.
+
+## Model selection
+
+- Worker defaults use Gemini 4 Hydrogen. `--effort low|medium|high|xhigh` selects its tier; `--model` accepts `hydrogen`, `carbon`, `argon`, `flash`, `pro`, or an effort-suffixed ID. Carbon and Argon have low/medium/high tiers; requesting xhigh on those families selects high with a warning.
+- `flash` remains an explicit Gemini 3.8 Flash alias. Continuation keeps the recorded model unless overridden. Unavailable models fail with diagnostics and compatible recommendations; do not automatically retry or switch models.
 <!-- END SHARED PERSONA RULES -->
 
 ## Locating the companion
@@ -38,7 +43,7 @@ The command returns a job id. Read `../agy-jobs/SKILL.md` for result collection 
 ## Flags (all optional)
 
 - `--prompt <text>` / `--prompt-file <path>` / `--stdin` — the task, from exactly one of these three sources. Use file/stdin for long prompts instead of shell quoting.
-- `--model <id>` or `--effort low|medium|high` — default model is `gemini-3.8-flash-medium`.
+- `--model <id>` or `--effort low|medium|high|xhigh` — default model is `gemini-4-hydrogen-medium`.
 - `--restricted` / `--unrestricted` — permission profile; staffer defaults to unrestricted like the other tool-using personas, `--restricted` is the opt-in hardening path.
 - `--timeout <dur>` — default 60m, maximum 120m hard execution limit.
 

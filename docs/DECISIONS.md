@@ -163,3 +163,24 @@ release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，�
 - 驗收：新增測試在舊程式上紅、移植後綠；`tools/dev_check.ps1` Full 各測試批次通過；strict 上游檢查因上游已有 v0.9.0～0.9.2 未審而未綠，水位不動。
 - 靜態檢查：runtime 三檔、共用模板、native 測試共 5 檔與 #52 來源逐位元組相同；新增差量掃描 eval／new Function／globalThis／長編碼字串／長空白後程式皆 0 命中。新 generator 為來源的 canonical 部分；只保留 Pi 轉換。
 - 重新評估條件：維護者回報原生診斷、共用規則或 job ID 接續行為退化時，重查對應來源差異與離線回歸測試。
+
+## 2026-11-13：審查 v0.9.0～v0.9.2，PR #55／#56／#58／#60、issue #54／#57／#59
+
+- 來源：只讀本機既有 `d90bac7af2cf38efbac76531e013a838b4513de9..2b78b4548070af6b8ff154379aecfca6b6762907`，共 4 筆 commit；PR／issue 狀態於 2026-11-13 以 `gh pr list`／`gh issue list` 查詢，`tools/dev_check.ps1` 的 strict 上游檢查回報 current（遠端 master 即 `2b78b45`）。PR head SHA 與下表 squash commit 不同，採用來源以本機 master 的 squash commit 為準。
+- 原則：Windows 原生維護線，按功能移植，不跟上游版本號。沿用 11-08 不採 brain、OpenCode、bench 的裁決；DeepSeek Harness 是另一個新 host，也需要明確的產品範圍授權。
+
+| 項目 | 判定 | 證據與本 fork 的對照 | 重新評估條件 |
+| --- | --- | --- | --- |
+| v0.9.0／#55／`1f66a8d` | skip | 19 檔、+5966/-12；核心是新 `dsh/` server plugin、Cordis 設定與約 4184 行側欄 client，依賴未採用的 OpenCode skills 與 brain。沒有現有 companion 修復；不移植新 host、側欄、打包 exports、素材或版本號。 | 明確核准 DeepSeek host，並建立 Windows 安裝、工具與側欄驗收。 |
+| issue #54（closed） | skip | #55 的 DeepSeek／像素子代理側欄需求，隨 #55 結案；本 fork 沒有對應 host。 | 同 #55。 |
+| #56／`105de09` | skip | 僅替換 `assets/codex-desktop-screenshot.png`，不影響功能、Windows 或模型可用性。 | 需要更新 fork 自身的介面說明時，使用可驗證的 fork 畫面。 |
+| v0.9.1／#58／`8a69f0a` | adopt（模型部分）；skip（brain／DSH／素材／版本） | 採用 Carbon／Argon catalog、family aliases、同 effort 相容模型建議及模型清單解析／錯誤辨識修正；一併保留來源中的 Claude 5.5 family 註冊。現有五個角色因此可明確選模，不增加角色或 host。brain 預設、自動 fallback／cache、像素圖示與 DSH UI 不屬本 fork 範圍。 | 模型 ID 或 catalog 格式改變，或明確核准 brain／新 host。 |
+| issue #57（closed） | adopt（明確選模）；skip（第二大腦／圖示） | #58 已合併；模型選擇可獨立用於現有角色，第二大腦則沿用 #53 不採用決策。 | 同 #58。 |
+| v0.9.2／#60／`2b78b45` | adopt（Hydrogen 預設／xhigh／診斷建議）；skip（brain 自動 fallback／DSH／素材／版本） | 上游宣告 3.8 Flash 退出內建預設，直接影響五個既有角色，故改為 Hydrogen 並保留 low/medium/high 分工。`--effort xhigh` 選 Hydrogen；Carbon／Argon 不支援 xhigh 時警告並選 high。保留 `flash` alias、舊模型 ID 與舊 job 接續／restart。舊 catalog 沒有 Hydrogen 時清楚失敗並給相容建議，不自動重跑。 | 真實 CLI 顯示 Hydrogen 不可用、舊 job 模型遺失或診斷退化時重查；真實驗收須符合 ROADMAP 的授權通道。 |
+| issue #59（closed） | adopt（退出 Flash 預設）；skip（brain fallback tail） | #60 已合併；Flash 退役是上游 release 主張，本輪未驗證個別帳號可用性。只移植現有角色的相容性更新，不採 Carbon -> Argon -> Hydrogen 自動重試鏈。 | 同 #60；採用自動 fallback 前須先核准 brain 與重試／配額契約。 |
+
+- fallback 判讀：上游 `BRAIN_FALLBACK_CHAIN` 只在未指定模型的新 brain 工作啟用；可在不支援模型、模型權限或 quota 錯誤後嘗試下一模型，且有 24 小時不可用模型 cache。普通角色與明確 `--model` 不使用該鏈。本 fork 沒有 brain，移植此機制會擴大執行及配額邊界，故 skip；相容模型「建議」採用，與自動換模分開處理。
+- 適配：只移植 companion 選模與診斷函式，不替換整份 runtime、不改 stream worker。共用選模規則寫入 `templates/persona-skill-rules.md`，以 `npm run generate:pi` 產生 canonical 共用區塊與 Pi；雙語 README 與 reference 同步預設說明，移除已過時的 Flash 預設 badge。新選模測試加入 Full 的 Modes-Continuation 批次。
+- 安全審查：讀取來源 diff 後按函式移植；採用內容沒有新增行程啟動方式、網路操作、憑證讀取或自動更新。模型 discovery 保留既有 `agy models` 失敗診斷路徑；401／403／429 不自動換模或重新執行任務。
+- 驗收：舊程式上 Hydrogen／xhigh 聚焦測試 0/2、新增選模測試 0/5；移植後全部轉綠。`pwsh -NoProfile -File tools/dev_check.ps1` Full：六個測試批次全數 PASSED，strict 上游檢查 current，結果 `WINDOWS DEV CHECK GREEN`。`node scripts/generate-pi-skills.mjs --check` exit 0（11 files、0 changed），`python tools/check_links.py` exit 0。真實 agy 帳號下的 Hydrogen 呼叫未實測。
+- 水位：`reviewed_through` `d90bac7` → `2b78b4548070af6b8ff154379aecfca6b6762907`、`reviewed_release` v0.8.2 → v0.9.2、PR 53 → 60、issue 51 → 59、日期 2026-11-13，`monitored` 維持空陣列。水位表示逐筆審查完成，不代表全數採用。README 嵌入的 `assets/design.png`／`design.svg` 仍寫 3.8 Flash（上游新素材本次 skip），重產列在 ROADMAP。

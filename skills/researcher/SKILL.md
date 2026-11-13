@@ -1,7 +1,7 @@
 ---
 name: researcher
 description: Delegate a deep research or survey task to Google's Antigravity CLI (agy staffer, fast Gemini). Use when the user says /agy:researcher, "ask agy to research", "have the agy staffer survey X", or wants a second, independent deep-dive on a topic or codebase without spending the host model's quota.
-argument-hint: '[--model <id>|--effort low|medium|high] [--restricted|--unrestricted] [--prompt-file <path>|--stdin] "what to research"'
+argument-hint: '[--model <id>|--effort low|medium|high|xhigh] [--restricted|--unrestricted] [--prompt-file <path>|--stdin] "what to research"'
 allowed-tools: Read, Glob, Grep, Bash(node:*), Bash(git:*), Bash(gh:*)
 ---
 
@@ -17,6 +17,11 @@ Delegate a research task to the agy staffer via the shared companion script. You
 - Start fresh for a different task or persona, an independent opinion, or an explicit fresh start. Carry relevant findings and artifact paths into the new brief.
 - Pass the user's task and explicit authorizations verbatim. On follow-up, add decisions and constraints from the host chat that the worker has not seen. Continuation does not expand authorization.
 - Run the companion unsandboxed; in Codex, request escalated execution. Follow `../jobs/SKILL.md` for collection and recovery. After an execution timeout, obtain explicit user confirmation before continuing or restarting.
+
+## Model selection
+
+- Worker defaults use Gemini 4 Hydrogen. `--effort low|medium|high|xhigh` selects its tier; `--model` accepts `hydrogen`, `carbon`, `argon`, `flash`, `pro`, or an effort-suffixed ID. Carbon and Argon have low/medium/high tiers; requesting xhigh on those families selects high with a warning.
+- `flash` remains an explicit Gemini 3.8 Flash alias. Continuation keeps the recorded model unless overridden. Unavailable models fail with diagnostics and compatible recommendations; do not automatically retry or switch models.
 <!-- END SHARED PERSONA RULES -->
 
 ## Locating the companion
@@ -33,7 +38,7 @@ The command returns a job id. Read `../jobs/SKILL.md` for result collection and 
 
 ## Flags (all optional)
 
-- `--model <id>` or `--effort low|medium|high` — default model is `gemini-3.8-flash-high`.
+- `--model <id>` or `--effort low|medium|high|xhigh` — default model is `gemini-4-hydrogen-high`.
 - `--restricted` / `--unrestricted` — permission profile. research defaults to unrestricted, so it works out of the box with no setup. `--restricted` is the opt-in hardening path: agy runs without `--dangerously-skip-permissions` and may only use allowlisted tools, so it needs the setup flow's evidence-gathering allowlist to be useful — and some native agy tools ignore allow-rules headless, so restricted runs can still come back empty.
 - `--prompt <text>` / `--prompt-file <path>` / `--stdin` — the task, from exactly one of these three sources. Use file/stdin for long prompts.
 - `--timeout <dur>` — default 60m, maximum 120m hard execution limit.

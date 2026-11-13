@@ -109,3 +109,19 @@ python tools\check_upstream_updates.py --strict
 
 水位維持 2026-11-08 已審閱的 v0.8.2／PR 53／issue 51；本次不是新一輪上游巡檢，
 不得把移植結果宣稱為最新遠端狀態。驗收限制與採用判斷見 `DECISIONS.md` 的同日條目。
+
+## 2026-11-13：v0.9.0～v0.9.2 審查
+
+來源為已取得的本機 Git objects，範圍 `d90bac7..2b78b4548070af6b8ff154379aecfca6b6762907`；
+共 4 筆 squash commit：#55 `1f66a8d`、#56 `105de09`、#58 `8a69f0a`、#60 `2b78b45`。
+PR／issue 於 2026-11-13 以 gh 查詢：PR #55、#56、#58、#60 已合併，issue #54、#57、#59 已關閉；strict 上游檢查 current。
+
+- v0.9.0／#55、issue #54：skip DeepSeek Harness 外掛、像素側欄與相關打包／素材；屬新 host。
+- #56：skip 宣傳截圖更新，沒有現有功能修復。
+- v0.9.1／#58、issue #57：adopt 現有角色的 Carbon／Argon 明確選模與診斷；skip brain、DSH 與圖示。
+- v0.9.2／#60、issue #59：adopt Hydrogen 預設、xhigh、舊 Flash／job 相容與模型建議；skip brain 專用自動 fallback／cache、DSH、素材與版本號。
+
+水位推進為 v0.9.2／`2b78b4548070af6b8ff154379aecfca6b6762907`、PR 60、issue 59，日期 2026-11-13。
+此水位是審查覆蓋，不是全數採用。
+這批照慣例直接在預設分支做功能移植，不執行第 3 節的 branch／merge 流程。
+逐筆證據、fallback 邊界與重新評估條件見 `DECISIONS.md` 同日 v0.9.0～v0.9.2 條目。

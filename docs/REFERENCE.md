@@ -6,11 +6,11 @@ Back to the [README](../README.md).
 
 | Persona (skill) | Companion mode | What it is | Default model | Profile | Execution |
 |---|---|---|---|---|---|
-| `ask` | `ask` | Cheap zero-tool one-shot Q&A (~3s); doubles as the post-install smoke test | `gemini-3.8-flash-low` | restricted (prompt-only) | synchronous — the answer comes back in the same call |
-| `staffer` | `staffer` | General-purpose delegation without a specialist role or fixed output format; shared operational guardrails still apply | `gemini-3.8-flash-medium` | unrestricted | background job — returns a job id |
-| `researcher` | `research` | Deep survey with cited sources and explicit unverified-claims marking | `gemini-3.8-flash-high` | unrestricted | background job — returns a job id |
-| `reviewer` | `review` | Second-opinion verifier, two flavors routed by subject: code review (severity-ranked findings with `file:line` refs) and general review (multi-angle challenge of a plan, design, or decision) | `gemini-3.8-flash-medium` | unrestricted | background job — returns a job id |
-| `implementer` | `implement` | Well-scoped coding task; agy edits the working tree and can perform explicitly requested Git delivery | `gemini-3.8-flash-high` | unrestricted | background job — returns a job id |
+| `ask` | `ask` | Cheap zero-tool one-shot Q&A (~3s); doubles as the post-install smoke test | `gemini-4-hydrogen-low` | restricted (prompt-only) | synchronous — the answer comes back in the same call |
+| `staffer` | `staffer` | General-purpose delegation without a specialist role or fixed output format; shared operational guardrails still apply | `gemini-4-hydrogen-medium` | unrestricted | background job — returns a job id |
+| `researcher` | `research` | Deep survey with cited sources and explicit unverified-claims marking | `gemini-4-hydrogen-high` | unrestricted | background job — returns a job id |
+| `reviewer` | `review` | Second-opinion verifier, two flavors routed by subject: code review (severity-ranked findings with `file:line` refs) and general review (multi-angle challenge of a plan, design, or decision) | `gemini-4-hydrogen-medium` | unrestricted | background job — returns a job id |
+| `implementer` | `implement` | Well-scoped coding task; agy edits the working tree and can perform explicitly requested Git delivery | `gemini-4-hydrogen-high` | unrestricted | background job — returns a job id |
 
 `lead` provides task orchestration guidance for the current agent, reusing the existing companion modes without adding a mode of its own; invoke `/agy:lead` in Claude Code, `$agy:lead` in Codex, or `/skill:agy-lead` in Pi.
 
@@ -108,8 +108,8 @@ Caveat, stated plainly: **the exact project-settings file path is undocumented a
 | Flag | Meaning |
 |---|---|
 | `--job <id>` | (`continue` only) resume a specific recorded job's conversation with its original persona, model, and permission profile |
-| `--model <id>` | explicit agy model (see `agy models`). Ids are effort-suffixed (`gemini-3.8-flash-low`); the companion normalizes bare families (`gemini-3.8-flash` + `--effort`) and the aliases `flash`/`pro`, and rejects unknown ids pre-flight |
-| `--effort low\|medium\|high` | shorthand for `gemini-3.8-flash-<effort>` |
+| `--model <id>` | explicit agy model (see `agy models`). Ids are effort-suffixed (`gemini-4-hydrogen-low`); the companion normalizes bare families (`gemini-3.8-flash` + `--effort`) and the aliases `hydrogen`/`carbon`/`argon`/`flash`/`pro`, and rejects unknown ids pre-flight |
+| `--effort low\|medium\|high\|xhigh` | shorthand for `gemini-4-hydrogen-<effort>` |
 | `--restricted` / `--unrestricted` | permission profile override (ignored by `ask`). `unrestricted` is the default for `staffer`/`research`/`review`/`implement`, so `--restricted` is the flag you actually reach for |
 | `--restrict <modes\|none>` | (setup) per-repo policy: the listed modes default to restricted in this repository; `none` clears it. See [Per-repo policy](#per-repo-policy-setup---restrict) |
 | `--json` | (review) schema-enforced JSON findings; default is free-form markdown. Meant for the code-review flavor |
@@ -303,3 +303,13 @@ assets/                       design diagram + logo + badges
 tests/                        offline regression tests and opt-in integration suites
 docs/                         references, installation guide and release notes
 ```
+
+## Hydrogen model defaults (upstream v0.9.2)
+
+The fork adopts Hydrogen defaults without tracking upstream package versions. `ask` uses low effort, `staffer` and `review` medium, and `research` and `implement` high. Bare `--effort low|medium|high|xhigh` selects `gemini-4-hydrogen-<effort>`.
+
+Explicit aliases are `hydrogen`, `carbon`, `argon`, `flash` (Gemini 3.8 Flash), and `pro`. Carbon/Argon support low/medium/high; requesting xhigh selects high with a warning. Full effort-suffixed IDs override `--effort`. Existing jobs retain their recorded model on continuation and restart unless an override is supported and explicitly supplied.
+
+If a model is unavailable, the companion reports the original error, queries `agy models`, and recommends a compatible model. An unavailable xhigh tier may receive a high-tier recommendation. Recommendations never trigger automatic retries or model switches. Authentication, quota and workspace permission errors do not trigger replacement discovery. The upstream Carbon -> Argon -> Hydrogen automatic chain belongs to `brain`, which this fork does not include.
+
+Model availability and retirement are upstream release claims, not a live account validation. All automated regression checks use fake agy; older catalogs can still explicitly select `--model flash`.

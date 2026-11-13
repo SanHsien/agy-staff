@@ -2,7 +2,7 @@
 
 <p align="center"><strong>繁體中文</strong> | <a href="README.en.md">English</a></p>
 
-<p align="center"><a href="https://antigravity.google/product/antigravity-cli"><img src="assets/badges/powered-by-antigravity.svg" height="20" alt="powered by: Antigravity"></a> <img src="assets/badges/model-gemini-3-8-flash.svg" height="20" alt="model: Gemini 3.8 Flash"></p>
+<p align="center"><a href="https://antigravity.google/product/antigravity-cli"><img src="assets/badges/powered-by-antigravity.svg" height="20" alt="powered by: Antigravity"></a></p>
 
 <p align="center"><a href="https://claude.com/claude-code"><img src="assets/badges/claude-code-plugin.svg" height="20" alt="Claude Code plugin"></a> <a href="https://developers.openai.com/codex/"><img src="assets/badges/codex-plugin.svg" height="20" alt="Codex plugin"></a> <a href="LICENSE"><img src="assets/badges/license-mit.svg" height="20" alt="license: MIT"></a></p>
 
@@ -16,7 +16,7 @@
 
 ## 為什麼需要它？(What & Why)
 
-`agy-staff` 讓主代理人（資深 Agent）將具體工作委派給 `agy`，享受極速的 **Gemini 3.8 Flash** 模型支援。
+`agy-staff` 讓主代理人（資深 Agent）將具體工作委派給 `agy`，享受極速的 **Gemini 4 Hydrogen** 模型支援。
 它提供五種角色（Personas）：
 - `staffer`（全能小弟，通用任務與產圖）
 - `researcher`（調研程式庫與架構）

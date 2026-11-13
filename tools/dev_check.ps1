@@ -122,7 +122,7 @@ if ($Quick) {
         },
         [PSCustomObject]@{
             Name = "Modes-Continuation"
-            Files = @("tests/modes.test.mjs", "tests/continuation.test.mjs")
+            Files = @("tests/modes.test.mjs", "tests/model-selection.test.mjs", "tests/continuation.test.mjs")
         },
         [PSCustomObject]@{
             Name = "Regressions-Recovery"

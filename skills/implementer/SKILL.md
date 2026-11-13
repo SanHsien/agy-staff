@@ -1,7 +1,7 @@
 ---
 name: implementer
 description: Delegate a coding task to Google's Antigravity CLI (agy staffer, fast Gemini), which edits the working tree directly and can perform explicitly requested Git delivery. Use when the user says /agy:implementer, "have agy fix/build X", or wants to hand a well-scoped coding task to the agy staffer instead of doing it in the host model.
-argument-hint: '[--restricted|--unrestricted] [--model <id>|--effort low|medium|high] [--prompt-file <path>|--stdin] "task description"'
+argument-hint: '[--restricted|--unrestricted] [--model <id>|--effort low|medium|high|xhigh] [--prompt-file <path>|--stdin] "task description"'
 allowed-tools: Read, Glob, Grep, Bash(node:*), Bash(git:*), Bash(gh:*)
 ---
 
@@ -17,6 +17,11 @@ Hand a coding task to the agy staffer. agy edits the real working tree under its
 - Start fresh for a different task or persona, an independent opinion, or an explicit fresh start. Carry relevant findings and artifact paths into the new brief.
 - Pass the user's task and explicit authorizations verbatim. On follow-up, add decisions and constraints from the host chat that the worker has not seen. Continuation does not expand authorization.
 - Run the companion unsandboxed; in Codex, request escalated execution. Follow `../jobs/SKILL.md` for collection and recovery. After an execution timeout, obtain explicit user confirmation before continuing or restarting.
+
+## Model selection
+
+- Worker defaults use Gemini 4 Hydrogen. `--effort low|medium|high|xhigh` selects its tier; `--model` accepts `hydrogen`, `carbon`, `argon`, `flash`, `pro`, or an effort-suffixed ID. Carbon and Argon have low/medium/high tiers; requesting xhigh on those families selects high with a warning.
+- `flash` remains an explicit Gemini 3.8 Flash alias. Continuation keeps the recorded model unless overridden. Unavailable models fail with diagnostics and compatible recommendations; do not automatically retry or switch models.
 <!-- END SHARED PERSONA RULES -->
 
 ## Locating the companion
@@ -41,7 +46,7 @@ The command returns a job id. Read `../jobs/SKILL.md` for result collection and 
 ## Flags (all optional)
 
 - `--restricted` / `--unrestricted` — permission profile. implement defaults to unrestricted, so it works out of the box with no setup. `--restricted` is the opt-in hardening path: agy may then only use allowlisted tools, so it can usually only propose rather than edit, and it needs the setup flow's evidence-gathering allowlist to be useful.
-- `--model <id>` / `--effort low|medium|high` (default `gemini-3.8-flash-high`), `--timeout <dur>` (default 60m, maximum 120m hard execution limit).
+- `--model <id>` / `--effort low|medium|high|xhigh` (default `gemini-4-hydrogen-high`), `--timeout <dur>` (default 60m, maximum 120m hard execution limit).
 - `--prompt <text>` / `--prompt-file <path>` / `--stdin` — the task, from exactly one of these three sources. Use file/stdin for long prompts.
 
 ## Rules

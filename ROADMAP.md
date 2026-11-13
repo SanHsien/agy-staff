@@ -5,11 +5,12 @@
 
 ## 現況
 
-Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`），把 Google Antigravity CLI（`agy`）當「小弟」委派的外掛，支援 Claude Code、Codex CLI、Pi；與上游無共同祖先是 2026-10-24 單一 commit 的已知結果，不是缺陷。審查水位在 `tools/upstream_baseline.json`（release v0.8.2、PR 53、issue 51，2026-11-08 審查）。健康：2026-11-08 查：Dependabot 與 Code scanning open 告警各 0（`gh api repos/SanHsien/agy-staff/{dependabot,code-scanning}/alerts?state=open`）；2026-10-29 查到 open PR 0、Dependabot 與 Code scanning 告警各 0，`CI`、`CodeQL`、`Dependency freshness`、`Generated skills consistency`、`Upstream check` 在 `main` 最近一次皆 success；issues 在此 repo 停用，所以 issue 數是「未查到」；沒有 release（2026-10-29 `gh` 查詢）。**使用限制**：維護者 2026-10-27 政策禁止第三方 agent 經 `agy -p` 使用 Antigravity 個人訂閱，因此本 repo 的測試一律用假的 `agy`（`tests/continuation.test.mjs:85` 的 `FAKE_AGY`），任何 agent 都不得為了驗證而實際呼叫 `agy`。
+Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`），把 Google Antigravity CLI（`agy`）當「小弟」委派的外掛，支援 Claude Code、Codex CLI、Pi；與上游無共同祖先是 2026-10-24 單一 commit 的已知結果，不是缺陷。審查水位在 `tools/upstream_baseline.json`（release v0.9.2、PR 60、issue 59，2026-11-13 審查）。健康：2026-11-08 查：Dependabot 與 Code scanning open 告警各 0（`gh api repos/SanHsien/agy-staff/{dependabot,code-scanning}/alerts?state=open`）；2026-10-29 查到 open PR 0、Dependabot 與 Code scanning 告警各 0，`CI`、`CodeQL`、`Dependency freshness`、`Generated skills consistency`、`Upstream check` 在 `main` 最近一次皆 success；issues 在此 repo 停用，所以 issue 數是「未查到」；沒有 release（2026-10-29 `gh` 查詢）。**使用限制**：維護者 2026-10-27 政策禁止第三方 agent 經 `agy -p` 使用 Antigravity 個人訂閱，因此本 repo 的測試一律用假的 `agy`（`tests/continuation.test.mjs:85` 的 `FAKE_AGY`），任何 agent 都不得為了驗證而實際呼叫 `agy`。
 
 ## 近期：可以直接動手
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
+| 重產 README 的 `assets/design.png`／`design.svg`，模型名改為 Gemini 4 Hydrogen | 2026-11-13 預設改為 Hydrogen，但 README 嵌入的設計圖仍寫 Gemini 3.8 Flash；上游同期的新素材因含 DSH／品牌內容而 skip | 圖中預設模型與 `companion/agy-companion.mjs` 的 DEFAULTS 一致；README 雙語引用不變、`python tools/check_links.py` 綠 | Codex | `docs/DECISIONS.md` 2026-11-13 v0.9.0～v0.9.2 條目 |
 
 ## 中期：等條件成立再做
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
