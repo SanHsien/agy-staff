@@ -107,8 +107,7 @@ Caveat, stated plainly: **the exact project-settings file path is undocumented a
 
 | Flag | Meaning |
 |---|---|
-| `--conversation <id>` | resume a specific agy conversation |
-| `--continue` | reuse this mode's last conversation id from state |
+| `--job <id>` | (`continue` only) resume a specific recorded job's conversation with its original persona, model, and permission profile |
 | `--model <id>` | explicit agy model (see `agy models`). Ids are effort-suffixed (`gemini-3.8-flash-low`); the companion normalizes bare families (`gemini-3.8-flash` + `--effort`) and the aliases `flash`/`pro`, and rejects unknown ids pre-flight |
 | `--effort low\|medium\|high` | shorthand for `gemini-3.8-flash-<effort>` |
 | `--restricted` / `--unrestricted` | permission profile override (ignored by `ask`). `unrestricted` is the default for `staffer`/`research`/`review`/`implement`, so `--restricted` is the flag you actually reach for |
@@ -119,7 +118,7 @@ Caveat, stated plainly: **the exact project-settings file path is undocumented a
 | `--prompt-file <path>` | read the task text from a file — for long prompts, instead of shell quoting |
 | `--stdin` | read the task text from stdin. Exactly one task source per call: `--prompt`, `--prompt-file`, or `--stdin` |
 
-That table is the whole public surface. There is no flag for execution style — see the modes table above.
+That table is the whole public surface. Continuation is job-ID-only via `continue --job <id>`; `--continue` and `--conversation <id>` were removed (see [Migration from 0.8.0](#migration-from-080)). There is no flag for execution style — see the modes table above.
 
 ## Task text
 
@@ -139,7 +138,7 @@ Giving two at once is an error (`task text given more than one way (…) — use
 
 `--prompt` accepts a value that starts with `--` when it is a real sentence, meaning one that contains whitespace: `ask --prompt "--check means what?"` works. A flag-shaped value with no whitespace reads as a forgotten value and is rejected. `--` itself carries no special meaning; it parses as an unknown flag.
 
-Value flags (`--conversation`, `--model`, `--effort`, `--timeout`, `--restrict`, `--prompt`, `--prompt-file`) require a value. A missing one, an empty one, and — apart from the `--prompt` sentences above — a flag-shaped one are all errors, so `--model ""` is an error.
+Value flags (`--job`, `--model`, `--effort`, `--timeout`, `--restrict`, `--prompt`, `--prompt-file`) require a value. A missing one, an empty one, and — apart from the `--prompt` sentences above — a flag-shaped one are all errors, so `--model ""` is an error.
 
 Each flag is its own argument. Flags packed into a single quoted string (`review "--restricted Review PR #730"`) are an error that names the fix rather than a guess at where the flags end and the task begins.
 
@@ -168,14 +167,14 @@ The review template itself is a neutral skeleton (reviewer stance, evidence disc
 - `observe [id]` always returns bounded JSON (at most 8 KiB): current progress while running; terminal status, result path/availability and collection instructions when finished. Error/canceled/crashed states include bounded diagnostic and recovery metadata, never the full report. It reads job state independently of any wait, without resetting deadlines or consuming another observer’s history.
 - `status [id]` lists jobs or shows state and a bounded diagnostic log tail. `result [id]` reprints stored output.
 - `cancel <id>` requests cancellation and returns success after the worker stores its report and publishes `canceled`. It preserves crash diagnostics and never signals an unverified stored PID. Legacy jobs without a cancellation channel fail explicitly. A cancellation error requires checking the job and logs; it does not establish that execution stopped. Interrupting a wait does not cancel the worker.
-- `continue --job <id> --prompt "..."` resumes the known conversation with its original mode/model/profile and a linked new job. `continue --conversation <id>` also resolves configuration from that known conversation, never an unrelated last mode.
+- `continue --job <id> --prompt "..."` resumes the recorded job's conversation with its original mode/model/profile and creates a linked new job (staying synchronous in the foreground when continuing an `ask` job).
 - `restart <id>` explicitly relaunches the original task/configuration without a conversation, linked to the original job. Inspect partial workspace changes with `git status` and `git diff` before either recovery action. New runs regenerate workspace context. Legacy specifications label historical snapshots and append current context.
 
-Continuation/restart can be invoked from any directory within the same worktree and execute in the original cwd. Generic `continue` rejects unrecorded conversation IDs without launching AGY or searching other worktrees. Continuing a conversation whose job is still running (generic `continue`, or a mode's `--continue`/`--conversation`) is refused with exit 1 and the job ID and status; the follow-up is not queued, and the caller waits or cancels first. For continuation, explicit model/profile flags override the recorded values; otherwise those values are inherited. A new recovery budget defaults to 60m unless overridden.
+Continuation/restart can be invoked from any directory within the same worktree and execute in the original cwd. `continue` requires `--job <id>` and rejects unknown job IDs, bare `continue`, or legacy `--continue`/`--conversation` flags without launching AGY or searching other worktrees. Continuing a job whose conversation is still running is refused with exit 1 and the active job ID and status; the follow-up is not queued, and the caller waits or cancels first. For continuation, explicit model/profile flags override the recorded values; otherwise those values are inherited. A new recovery budget defaults to 60m unless overridden.
 
 Exit codes for wait/observe/status-with-id: **0** done, **2** running, **3** error/crashed, **4** canceled, **5** attention (resumable timeout), **1** command error. `result` also exits 5 for attention; its legacy exit behavior for other states is unchanged. Observe exit 0 means the job is finished, not that its report was delivered. Collect an already pending wait session; otherwise call result. Wait/result keep their existing full-result contract. A `done` status means invocation and response delivery ended, not that the task was accepted. Successful calls with warnings include an 8 KiB log tail on stderr and the full-log path; native status and exit code are recorded in that log. The orchestrator assesses completion and inspects further only when needed. Intermediate tool errors are retained internally and are not automatically promoted to warnings in successful delivery. A running snapshot contains timestamps, elapsed time, the latest five tool activities with input/output excerpts and the latest response text merged by step. Unknown states, incomplete text and truncation are labeled; a tool finishing is not proof of useful progress. UTF-8 JSON budgets are 1 KiB per activity, 2 KiB for text and 8 KiB total. For a user-requested progress answer or diagnosis after failure/required intervention, read bounded `details` excerpts only if the returned information is insufficient.
 
-The worker passes the selected timeout to AGY and independently enforces an overall limit including initialization: default 60m, configurable up to 120m with launch `--timeout`. If response text arrived before hard-expiry cleanup, it is delivered with a warning; an empty or absent response needs attention when a conversation is known, otherwise it remains a failure. Wait/observe cannot renew it. Without a response, hard expiry produces `reason=hard_timeout`; an explicit TIMEOUT status or AGY's exact `ERROR` plus `timeout waiting for response` produces `reason=response_timeout`. A known conversation yields `status=attention` and exit 5; without one the status is `error`. Reports retain the last snapshot, logs, original configuration and pre-run/current workspace status (porcelain cannot detect content changes to an already dirty file; inspect diffs). Recovery metadata includes `requires_user_confirmation`, `suggested_timeout` (double the previous timeout, capped at 120m for background jobs) and an exact continuation command. At the ceiling, narrow the task. Calling agents must ask whether to continue or stop and inspect, and recover only after explicit user confirmation. Explicit recovery creates a linked new job with a fresh budget, preserving the old terminal record; the companion never retries automatically.
+The worker passes the selected timeout to AGY and independently enforces an overall limit including initialization: default 60m, configurable up to 120m with launch `--timeout`. If response text arrived before hard-expiry cleanup, it is delivered with a warning; an empty or absent response needs attention when a conversation is known, otherwise it remains a failure. Wait/observe cannot renew it. Without a response, hard expiry produces `reason=hard_timeout`; native `finished_reason=print_timeout`, or in legacy output an explicit TIMEOUT status or AGY's exact `ERROR` plus `timeout waiting for response`, produces `reason=response_timeout`. A known conversation yields `status=attention` and exit 5; without one the status is `error`. Reports retain the last snapshot, logs, original configuration and pre-run/current workspace status (porcelain cannot detect content changes to an already dirty file; inspect diffs). Recovery metadata includes `requires_user_confirmation`, `suggested_timeout` (double the previous timeout, capped at 120m for background jobs) and an exact continuation command. At the ceiling, narrow the task. Calling agents must ask whether to continue or stop and inspect, and recover only after explicit user confirmation. Explicit recovery creates a linked new job with a fresh budget, preserving the old terminal record; the companion never retries automatically.
 
 Wait is silent until completion or soft expiry. Only an explicit user progress question warrants observation while running; keep the pending wait open and do not turn the question into recurring checks. Host session collection (such as Codex `write_stdin`) retrieves the pending command’s output, which may include a soft-expiry snapshot; it does not independently read AGY progress. Prefer background completion delivery or a long supported blocking wait. Avoid short empty polls, sleep/observe loops and progress queries for routine updates.
 
@@ -184,6 +183,10 @@ Use one independent background wait per job where the harness supports it, never
 Per-repository state lives in `<repo>/.agy-staff/`. `state.json` stores conversations, configuration history indexed by conversation ID (including foreground ask), and lifecycle records, protected by short write transactions; observation reads remain read-only. `config.json` holds optional permission policy. Each job has a spec, diagnostic log, result, final status sidecar, raw stdout (`.events.jsonl`) and atomically published bounded snapshot (`.progress.json`). Raw records may include unknown/malformed events. Missing activity files on legacy jobs yield a status-only snapshot.
 
 After warning-free success, results and metadata become durable before the raw stream/snapshot are deleted. Failures, cancellation, hard timeout and warning results retain intermediates. Results, diagnostic logs, conversation metadata and AGY's own conversation storage are retained. Readers racing with cleanup recheck terminal state: observe returns terminal metadata; wait returns the result. Observe never reads result-file contents, even after successful intermediates have been deleted. Crash-without-result reports include dispatch/worker-start evidence, process IDs, log existence/size and next-inspection/recovery commands without copying prompts or environment values.
+
+### Native result diagnostics
+
+New runs preserve native AGY metadata under `agy` (`exit_code`, `status`, `finished_reason` from AGY 1.4.11+, and up to three bounded `AGY_ERROR` records from AGY 1.2.6+ with `status`, `error_code`, `code_kind`, `retryable`, `error_id`) in job state, terminal status sidecars, failure diagnostic packets and terminal `observe` JSON (within the 8 KiB observe budget; `short_error` stays in the raw log). When native warnings or errors occur, foreground calls and `wait`/`result` also emit `[agy-staff] native_result: <JSON>` on stderr while keeping normal warning-free runs quiet. Nonempty responses with `finished_reason` (`print_timeout`, `interrupted`, `error`) follow the `done_with_warnings` contract and retain intermediates; without response text, explicit `print_timeout` enters `response_timeout`/`attention`, while explicit non-timeout reasons and structured API errors (such as `DEADLINE_EXCEEDED`) outrank legacy timeout or flag-compatibility prose. `retryable` is host evidence only and never triggers automatic retry. If `agy` is missing or rejects a companion CLI option/output format without a structured API error, the companion probes `agy --version` on demand and advises installing AGY or running `agy update` (plugin updates do not update the AGY binary).
 
 ### Keeping `.agy-staff/` out of git
 
@@ -251,6 +254,20 @@ Management commands (`status`, `wait`, `result`, `cancel`, `setup`) are untouche
 
 If the installed `agy` CLI does not support Gemini 3.8 Flash, the companion fails clearly without silent fallback: it queries `agy models` and reports available models alongside the best same-effort compatible recommendation (e.g. `--model gemini-3.7-flash-high`), advising that updating `agy` is preferred to use the latest default.
 
+## Migration from 0.8.0
+
+The versions in this section follow upstream releases; fork version numbers do not track them.
+
+0.8.1 standardizes continuation on job IDs (`continue --job <id>`) so follow-ups always target an explicit job and keep its original persona, and records `ask-...` job entries for synchronous `ask` runs.
+
+| 0.8.0 | 0.8.1 | Notes |
+|---|---|---|
+| `<persona> --continue --prompt "..."` | `continue --job <id> --prompt "..."` | Removed flag; error names the latest matching job ID in the repository when available. |
+| `<persona> --conversation <conv> --prompt "..."` or `continue --conversation <conv> --prompt "..."` | `continue --job <id> --prompt "..."` | Removed flag; error maps a recorded `<conv>` to its `<job-id>` when available. |
+| `<persona> --job <id> --prompt "..."` | `continue --job <id> --prompt "..."` | Rejected on persona commands instead of being ignored; continuation inherits the job's original persona. |
+| bare `continue --prompt "..."` | `continue --job <id> --prompt "..."` | `--job <id>` is required; error names the latest recorded job ID when available. |
+| synchronous `ask` recorded only a conversation ID | `ask` records an `ask-...` job ID (`job=ask-...` on stderr, listed by `status`) | Follow up with `continue --job <ask-id> --prompt "..."` (stays synchronous in the foreground). Pre-0.8.1 jobless `ask` conversations cannot be resumed with `continue --job`; start a fresh `ask` run to create a job ID. |
+
 ## Windows support
 
 Windows is supported on a best-effort basis and exercised by the `Tests (Windows)` CI job; it has not yet been validated against a real Windows `agy` installation. Subprocesses are spawned with `windowsHide: true` so no console windows appear during background execution. Job cancellation and process cleanup discover descendant processes via PowerShell (`Get-CimInstance Win32_Process`, with `CreationDate` in round-trip precision) and terminate each identified member individually; the leader falls to `taskkill /PID <pid> /F`, never `/T`. A parent link is only followed when the child was created after its parent: Windows keeps a dead parent's PID in `ParentProcessId`, so once that PID is reused an unrelated orphan (typically another job's detached worker) would otherwise look like a descendant and be killed. State locking retries transient Windows errors (`EPERM`/`EBUSY`/`EACCES`) when renaming or unlinking lock directories and marker files.
@@ -277,7 +294,8 @@ templates/                    shared prompt templates (staffer/ask/research/revi
 .codex-plugin/plugin.json     Codex plugin manifest
 .agents/plugins/              Codex marketplace manifest
 pi-skills/                    generated agy-* entrypoints/resources for Pi; do not hand-edit
-scripts/generate-pi-skills.mjs generates Pi skills and checks for drift
+scripts/generate-skills.mjs   generates the shared canonical persona rules
+scripts/generate-pi-skills.mjs generates Pi skills and checks canonical/adapter drift
 package.json                  Pi manifest, npm file allowlist, and verification commands
 skills/                       canonical personas + jobs (Claude/Codex entrypoints;
                               reviewer/ and jobs/ carry references/ for on-demand detail)

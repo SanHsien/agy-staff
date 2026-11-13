@@ -18,10 +18,13 @@
     "companion/",
     "templates/",
     "scripts/generate-pi-skills.mjs",
+    "scripts/generate-skills.mjs",
     "docs/INSTALL_FOR_AGENTS.md",
     "docs/REFERENCE.md"
   ],
   "scripts": {
+    "generate:skills": "node scripts/generate-pi-skills.mjs",
+    "check:skills": "node scripts/generate-pi-skills.mjs --check",
     "generate:pi": "node scripts/generate-pi-skills.mjs",
     "check:pi": "node scripts/generate-pi-skills.mjs --check",
     "test": "node --test --test-concurrency=1 tests/*.test.mjs",

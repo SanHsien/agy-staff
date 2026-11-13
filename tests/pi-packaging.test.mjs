@@ -32,6 +32,7 @@ test('generation is deterministic, copies assets, detects drift and rejects stal
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-pi-generator-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), { recursive: true });
+  fs.cpSync(path.join(ROOT, 'templates'), path.join(root, 'templates'), { recursive: true });
   const asset = path.join(root, 'skills', 'ask', 'asset.bin');
   fs.writeFileSync(asset, Buffer.from([0, 128, 255]));
   generatePiSkills({ root });
@@ -51,6 +52,7 @@ test('generation rejects symlink output', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-pi-symlink-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), { recursive: true });
+  fs.cpSync(path.join(ROOT, 'templates'), path.join(root, 'templates'), { recursive: true });
   const source = path.join(root, 'skills', 'ask', 'SKILL.md');
   const unexpected = path.join(root, 'pi-skills', 'obsolete.md');
   fs.mkdirSync(path.join(root, 'pi-skills'), { recursive: true });
@@ -70,6 +72,7 @@ test('reference notices preserve frontmatter and direct output edits fail withou
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-pi-reference-notice-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), { recursive: true });
+  fs.cpSync(path.join(ROOT, 'templates'), path.join(root, 'templates'), { recursive: true });
   const source = path.join(root, 'skills', 'ask', 'references', 'guide.md');
   fs.mkdirSync(path.dirname(source), { recursive: true });
   const frontmatter = '---\ntitle: Reference guide\n---\n';
@@ -100,6 +103,7 @@ test('generation preserves canonical prose and adds only shared compatibility co
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'agy-pi-policy-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.cpSync(path.join(ROOT, 'skills'), path.join(root, 'skills'), { recursive: true });
+  fs.cpSync(path.join(ROOT, 'templates'), path.join(root, 'templates'), { recursive: true });
   const before = new Map(names.map(name => [name, fs.readFileSync(path.join(root, 'skills', name, 'SKILL.md'))]));
   generatePiSkills({ root });
   for (const [name, original] of before) {

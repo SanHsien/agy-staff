@@ -10,7 +10,6 @@ Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`�
 ## 近期：可以直接動手
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 移植上游 v0.8.1 的原生診斷保留（#49／#48）與共用 persona 規則、僅用 job ID 的接續（#52／#51） | 2026-11-08 已採用 v0.8.0 範本文字，但 #52 會再改同一批技能與範本並動接續語意，應一次移植；#49 保留 `agy` 原生錯誤與完成原因，需要假 `agy` 上的測試 | 取 `d90bac7` 範圍內 `companion/{agy-companion,observation,stream-worker}.mjs`、`scripts/generate-skills.mjs`、`templates/persona-skill-rules.md`、`skills/*`、`tests/{native-result,shared-persona-rules,continuation}.test.mjs` 等；不取 `skills/brain`、`opencode-skills/`、版本號、bench；`tools/dev_check.ps1` Full 綠；不得實際呼叫 `agy` | Claude Opus | `docs/DECISIONS.md` 2026-11-08 條目；`git diff 9ddec3e d90bac7 --stat -- companion skills templates tests`（上游 clone） |
 
 ## 中期：等條件成立再做
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |

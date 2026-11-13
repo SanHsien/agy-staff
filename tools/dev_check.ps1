@@ -130,7 +130,7 @@ if ($Quick) {
         },
         [PSCustomObject]@{
             Name = "Worker-Templates"
-            Files = @("tests/worker-templates.test.mjs")
+            Files = @("tests/worker-templates.test.mjs", "tests/shared-persona-rules.test.mjs", "tests/native-result.test.mjs")
         }
     )
 

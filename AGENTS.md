@@ -27,7 +27,7 @@
 | 目錄 / 檔案 | 職責 | 編輯規範 |
 |---|---|---|
 | `companion/` | companion 執行期程式碼（Node.js ESM） | `agy-companion.mjs`（進入點與 CLI 處理）、`stream-worker.mjs`（背景排程與行程串流）、`observation.mjs`、`state-lock.mjs` |
-| `skills/` | **Canonical Skills 單一真相源** | 編輯角色（personas）一律在此目錄，嚴禁手動編輯 `pi-skills/` |
+| `skills/` | **Canonical Skills 單一真相源** | 編輯角色（personas）一律在此目錄，嚴禁手動編輯 `pi-skills/`。共用規則區塊由 `templates/persona-skill-rules.md` 產生；改模板後跑 `npm run generate:pi`（或 `npm run generate:skills`），不要手改共用規則區塊。 |
 | `pi-skills/` | 由 `skills/` 自動產生的 Pi 適配檔案 | 只能透過 `npm run generate:pi` 產生；送出前用 `npm run check:pi` 驗證 |
 | `templates/` | 共用提示詞範本 | 提供各 persona 專屬的引導提示詞 |
 | `tests/` | Node.js 原生測試套件（`node --test`） | 保持回歸測試獨立於本機網路與個人憑證，使用 `tests/fake-agy.mjs` |

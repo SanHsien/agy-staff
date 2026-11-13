@@ -2,6 +2,7 @@
 // Pi has a flat skill namespace. Keep the canonical skills for Claude/Codex,
 // and generate namespaced entrypoints at the same depth for Pi. No runtime deps.
 import fs from 'node:fs';
+import { generateCanonicalSkills, SHARED_START, SHARED_END } from './generate-skills.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -64,6 +65,9 @@ export function piFiles(root = ROOT) {
 }
 
 export function generatePiSkills({ root = ROOT, check = false } = {}) {
+  const hasSharedSource = fs.existsSync(path.join(root, 'templates/persona-skill-rules.md'))
+    || filesUnder(path.join(root, 'skills')).some(file => file.endsWith('.md') && (fs.readFileSync(file, 'utf8').includes(SHARED_START) || fs.readFileSync(file, 'utf8').includes(SHARED_END)));
+  if (hasSharedSource) generateCanonicalSkills({ root, check });
   const expected = piFiles(root);
   const actual = filesUnder(path.join(root, 'pi-skills'));
   const unexpected = actual.filter(file => !expected.has(path.relative(root, file)));

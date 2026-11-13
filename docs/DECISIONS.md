@@ -148,8 +148,18 @@ release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，�
 | --- | --- | --- | --- |
 | #44（speed probe）、#45（account relay） | reject | 2026-11-08 `gh api repos/keli-wen/agy-staff/pulls/{44,45}`：兩者皆 `closed`、`merged=false`；#45 還與 2026-10-27 禁止第三方 agent 經 `agy -p` 使用個人訂閱的政策相衝。 | 上游重開或以新 PR 重提。 |
 | #47／`07ab3d1` | reject（沿用 11-02） | 只動 `bench/` 與 `tests/bench-*`，本 fork 沒有。 | 同 11-02。 |
-| #49／`029eb7b`、issue #48（v0.8.1，保留原生 AGY 診斷） | defer（排入 ROADMAP 近期表） | `companion/{agy-companion,observation,stream-worker}.mjs` 共 +397／-146，另新增 `tests/native-result.test.mjs`（284 行）；是 `agy` 錯誤中繼資料與完成原因的保留，屬 companion 行為，需要對照 `agy` 版本（上游建議 v1.4.11 以上）且不能用真 `agy` 驗證，所以必須在假 `agy` 上補測。 | 採用前完成假 `agy` 測試並跑 Full gate。 |
-| #52／`883003a`、issue #51（v0.8.1，共用 persona 規則與僅用 job ID 的接續） | defer（排入 ROADMAP 近期表） | 51 檔、+856／-267，新增 `templates/persona-skill-rules.md` 與 `scripts/generate-skills.mjs` 的產生邏輯，並改變接續語意（只認 job ID）；會取代本輪剛採用的 v0.8.0 文字，所以應與 #49 一起一次性移植，避免兩次改同一批檔。 | 同上。 |
+| #49／`029eb7b`、issue #48（v0.8.1，保留原生 AGY 診斷） | defer（排入 ROADMAP 近期表）→ 2026-11-13 adopt | `companion/{agy-companion,observation,stream-worker}.mjs` 共 +397／-146，另新增 `tests/native-result.test.mjs`（284 行）；是 `agy` 錯誤中繼資料與完成原因的保留，屬 companion 行為，需要對照 `agy` 版本（上游建議 v1.4.11 以上）且不能用真 `agy` 驗證，所以必須在假 `agy` 上補測。 | 採用前完成假 `agy` 測試並跑 Full gate。 |
+| #52／`883003a`、issue #51（v0.8.1，共用 persona 規則與僅用 job ID 的接續） | defer（排入 ROADMAP 近期表）→ 2026-11-13 adopt | 51 檔、+856／-267，新增 `templates/persona-skill-rules.md` 與 `scripts/generate-skills.mjs` 的產生邏輯，並改變接續語意（只認 job ID）；會取代本輪剛採用的 v0.8.0 文字，所以應與 #49 一起一次性移植，避免兩次改同一批檔。 | 同上。 |
 | #53／`d90bac7`、issue #50（v0.8.2，`agy:brain`） | reject | 新增 `skills/brain/`、`templates/brain.md` 與 companion 子命令，是「外部大腦」協調角色，屬新產品範圍；本 fork 未承諾這個角色。 | 維護者核准把 brain 納入 fork。 |
 
 水位：`reviewed_through` `9ddec3e` → `d90bac7`、`reviewed_release` `v0.8.0` → `v0.8.2`、`reviewed_pr_through` 47 → 53、`reviewed_issue_through` 46 → 51、`reviewed_date` 2026-11-08；`monitored` 清空（#44、#45 已結案未合併）。本輪採用了上游 skills／templates 文字但不改 `package.json`／plugin 版本（版本號屬上游發行軸）。
+
+## 2026-11-13：移植 #49／#48、#52／#51
+
+- 來源：本機既有 `029eb7be41c61d19851a6aab1e66881c206d15a9` 與 `883003a7b433508d46b19b10d80bae75186c59a0`。`companion/` 與上游 `9ddec3e` 起點一致；採用至 #52，避免帶入 `d90bac7` 的 #53 brain。
+- 判定：將 2026-11-08 的 defer 改為 adopt。保留最近三筆有型別的原生錯誤、完成原因及終端診斷；錯誤證據不觸發自動重試或更新。接續只允許 `continue --job <id>`，同步 ask 也記錄 job，保留原 persona／設定；舊旗標提供遷移提示。
+- 適配：`scripts/generate-skills.mjs` 僅提供共用 canonical 規則產生；既有 `generate-pi-skills.mjs` 呼叫它後產生 Pi。`generate:skills`／`check:skills` 與 Pi 指令共用入口；打包白名單包含新模組。Full 批次納入兩份新增測試。沒有引進 OpenCode、bench、brain 或修改版本號。
+- 審查：逐段查核來源 runtime diff 與共用規則產生器；新增內容中的 child_process、CLI 相容性查詢及安裝連結均與既有執行邊界相符，沒有執行外部指令或真實 agy。保留 fork 的 Windows 與包裝測試修正。
+- 驗收：新增測試在舊程式上紅、移植後綠；`tools/dev_check.ps1` Full 各測試批次通過；strict 上游檢查因上游已有 v0.9.0～0.9.2 未審而未綠，水位不動。
+- 靜態檢查：runtime 三檔、共用模板、native 測試共 5 檔與 #52 來源逐位元組相同；新增差量掃描 eval／new Function／globalThis／長編碼字串／長空白後程式皆 0 命中。新 generator 為來源的 canonical 部分；只保留 Pi 轉換。
+- 重新評估條件：維護者回報原生診斷、共用規則或 job ID 接續行為退化時，重查對應來源差異與離線回歸測試。

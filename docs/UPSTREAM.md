@@ -97,3 +97,15 @@ python tools\check_upstream_updates.py --strict
 
 目前的 strict checker 會 fail-closed 地讀取 release、PR 與 issue 水位；branch
 沒有被它持久追蹤，因此本項是人工快照，下一輪仍須重查 branches endpoint。
+
+## 2026-11-13：v0.8.1 修正移植
+
+只讀取本機既有 Git objects：`9ddec3e..883003a7b433508d46b19b10d80bae75186c59a0`，
+包含 #49 `029eb7be41c61d19851a6aab1e66881c206d15a9`（issue #48）及
+#52 `883003a7b433508d46b19b10d80bae75186c59a0`（issue #51）。沒有 fetch、push、PR 或上游寫入。
+採用原生診斷保留、共用 persona 規則、job ID 接續及離線回歸測試；保留 fork 的 Pi-only
+產生器、Windows 測試與雙語文件。未採用 #53 brain、OpenCode、bench 或版本號。
+本輪依使用者要求直接在 `main` 修改，不執行本文件第 3 節的分支／merge 流程。
+
+水位維持 2026-11-08 已審閱的 v0.8.2／PR 53／issue 51；本次不是新一輪上游巡檢，
+不得把移植結果宣稱為最新遠端狀態。驗收限制與採用判斷見 `DECISIONS.md` 的同日條目。
