@@ -10,7 +10,6 @@ Windows 優先維護 fork（上游 `keli-wen/agy-staff`，預設分支 `master`�
 ## 近期：可以直接動手
 | 項目 | 為什麼 | 驗收方式 | 建議執行者 | 證據 |
 | --- | --- | --- | --- | --- |
-| 重產 README 的 `assets/design.png`／`design.svg`，模型名改為 Gemini 4 Hydrogen | 2026-11-13 預設改為 Hydrogen，但 README 嵌入的設計圖仍寫 Gemini 3.8 Flash；上游同期的新素材因含 DSH／品牌內容而 skip | 圖中預設模型與 `companion/agy-companion.mjs` 的 DEFAULTS 一致；README 雙語引用不變、`python tools/check_links.py` 綠 | Codex | `docs/DECISIONS.md` 2026-11-13 v0.9.0～v0.9.2 條目 |
 
 ## 中期：等條件成立再做
 | 項目 | 觸發條件 | 驗收方式 | 建議執行者 | 證據 |
