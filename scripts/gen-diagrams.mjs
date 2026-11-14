@@ -277,7 +277,7 @@ function diagramIntegration() {
   <rect x="${TILE.x}" y="${TILE.y}" width="${TILE.w}" height="${TILE.h}" rx="6" fill="${INK}"/>
   ${arch(TILE.x + 6, TILE.y + 5, 0.26)}
   <text x="${TILE.x + 48}" y="${TILE.y + 18}" font-size="11" font-weight="700" class="mono white">agy CLI</text>
-  <text x="${TILE.x + 48}" y="${TILE.y + 32}" font-size="9" class="silver">Gemini Flash</text>
+  <text x="${TILE.x + 48}" y="${TILE.y + 32}" font-size="8.5" class="silver">Gemini 4 Hydrogen</text>
   <text x="${BAR.x + 12}" y="${BAR.y + 50}" font-size="9.5" class="muted">Worker deadline: 60m default, 120m max. Wait expiry leaves it running; cancel &lt;id&gt; stops the job.</text>
 
   <!-- Three equal footer columns; icons sit in 24px slots with an 8px text gap. -->
