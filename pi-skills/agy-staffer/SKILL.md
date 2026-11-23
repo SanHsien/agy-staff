@@ -24,7 +24,7 @@ staffer is also the route to agy-native tools no specialist covers — notably *
 
 ## Model selection
 
-- Worker defaults use Gemini 4 Hydrogen. `--effort low|medium|high|xhigh` selects its tier; `--model` accepts `hydrogen`, `carbon`, `argon`, `flash`, `pro`, or an effort-suffixed ID. Carbon and Argon have low/medium/high tiers; requesting xhigh on those families selects high with a warning.
+- Worker defaults use Gemini 4 Hydrogen. `--effort low|medium|high|xhigh` selects its tier; `--model` accepts `hydrogen`, `neon`, `carbon`, `argon`, `flash`, `pro`, or an effort-suffixed ID. Neon has low/medium/high/xhigh tiers; Carbon and Argon have low/medium/high tiers; requesting xhigh on those families selects high with a warning.
 - `flash` remains an explicit Gemini 3.8 Flash alias. Continuation keeps the recorded model unless overridden. Unavailable models fail with diagnostics and compatible recommendations; do not automatically retry or switch models.
 <!-- END SHARED PERSONA RULES -->
 

@@ -184,3 +184,17 @@ release `v0.7.4`、PR 至 #41、issue 至 #40。水位表示已審閱覆蓋，�
 - 安全審查：讀取來源 diff 後按函式移植；採用內容沒有新增行程啟動方式、網路操作、憑證讀取或自動更新。模型 discovery 保留既有 `agy models` 失敗診斷路徑；401／403／429 不自動換模或重新執行任務。
 - 驗收：舊程式上 Hydrogen／xhigh 聚焦測試 0/2、新增選模測試 0/5；移植後全部轉綠。`pwsh -NoProfile -File tools/dev_check.ps1` Full：六個測試批次全數 PASSED，strict 上游檢查 current，結果 `WINDOWS DEV CHECK GREEN`。`node scripts/generate-pi-skills.mjs --check` exit 0（11 files、0 changed），`python tools/check_links.py` exit 0。真實 agy 帳號下的 Hydrogen 呼叫未實測。
 - 水位：`reviewed_through` `d90bac7` → `2b78b4548070af6b8ff154379aecfca6b6762907`、`reviewed_release` v0.8.2 → v0.9.2、PR 53 → 60、issue 51 → 59、日期 2026-11-13，`monitored` 維持空陣列。水位表示逐筆審查完成，不代表全數採用。README 嵌入的 `assets/design.png`／`design.svg` 仍寫 3.8 Flash（上游新素材本次 skip），重產列在 ROADMAP。
+
+## 2026-11-22：審查 v0.9.3（`f6f7015`、`5009090`）、PR #61–#63
+
+- 來源：`git fetch upstream` 後讀 `2b78b45..5009090`，共 2 筆 squash commit；PR 狀態以 `gh pr view` 查詢（#61、#63 已合併；#62 open）。issue 水位 #59 之後沒有新 issue。上游文字只當資料讀。
+- 隱藏內容掃描：對 `2b78b45..5009090` 與 #62 diff 的新增行掃 `eval(`／`new Function(`／`globalThis`／長 base64／`curl`／`iwr`／`iex`／`child_process`／網址，只命中 `assets/icons/neon.svg` 的 SVG namespace（未採用）。沒有新端點、遙測或權限預設變更。
+
+| 項目 | 判定 | 證據與本 fork 的對照 | 重新評估條件 |
+| --- | --- | --- | --- |
+| #61／`f6f7015` | reject | 只在上游英文／簡中 README 加入另一個上游作者專案（cospan）的推廣連結；本 fork README 依 FORK.md 第 5 點不放推廣性連結，且沒有 `README.zh-CN.md`。 | 本 fork 決定引用 cospan 或其他跨 harness 原語專案。 |
+| v0.9.3／#63／`5009090` | adopt（Neon 選模部分）；skip（brain、DSH、OpenCode、圖示、版本號、發行說明） | 與 11-13 採用 Carbon／Argon 的判準相同：現有五個角色可明確選 `gemini-4-neon-{low,medium,high,xhigh}`，不改預設模型、不加角色或 host。移植 `KNOWN_MODELS`、`MODEL_FAMILIES`、`neon` alias、`recommendCompatibleModel` 把 Neon 視為 Gemini 4 系列（同 effort 先建議 Carbon／Argon；xhigh 不在時建議 Carbon high），以及 usage 的 `--effort <l\|m\|h\|xh>`。共用規則與 `docs/REFERENCE.md` 同步，`npm run generate:pi` 重產 5 個 Pi 檔。 | 真實 `agy models` 顯示 Neon ID 改名或不存在；或維護者核准 brain／DSH。 |
+| #62（open，head `58b89c7947a1d95ff72002f1e7e73133aa895606`） | defer（釘在 `monitored`） | 5 檔 +59／-5：`MAX_INLINE_BYTES` 200KB → 800KB，並把 `payload.denied_actions`（headless 自動拒絕的工具呼叫）轉成 stderr 警告。未合併，作者自述未在真 `agy` 驗證。denied_actions 警告對本 fork 有用；800KB 的理由是 macOS `ARG_MAX`，Windows 的 `CreateProcess` 命令列上限只有 32767 字元，放寬上限不會讓 Windows 上的長 prompt 成功，只會把錯誤延後到 spawn，所以合併後也只考慮移植警告部分。 | `monitored` 報 head 或 state 改變（合併後隨 release 再審；移植警告前先寫失敗測試）。 |
+
+- 驗收：新增兩則測試（`tests/modes.test.mjs` 的 Neon alias／xhigh／bare family 斷言，`tests/triage.test.mjs` 的 Neon 不可用時的相容建議）在舊程式上紅（`unknown model id "neon"`），移植後綠。真實 agy 帳號下的 Neon 呼叫未實測（遵守 2026-10-27 政策）。
+- 水位：`reviewed_through` `2b78b45` → `50090900874d9f0cb11dd2d82c1f374c20656541`、`reviewed_release` v0.9.2 → v0.9.3、PR 60 → 63、issue 維持 59、日期 2026-11-22；`monitored` 加入 #62。

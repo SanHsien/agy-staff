@@ -125,3 +125,13 @@ PR／issue 於 2026-11-13 以 gh 查詢：PR #55、#56、#58、#60 已合併，i
 此水位是審查覆蓋，不是全數採用。
 這批照慣例直接在預設分支做功能移植，不執行第 3 節的 branch／merge 流程。
 逐筆證據、fallback 邊界與重新評估條件見 `DECISIONS.md` 同日 v0.9.0～v0.9.2 條目。
+
+## 2026-11-22：v0.9.3 審查
+
+`git fetch upstream` 後讀 `2b78b45..50090900874d9f0cb11dd2d82c1f374c20656541`，共 2 筆 squash commit：#61 `f6f7015`、#63 `5009090`；PR #62 open。
+
+- #61：reject README 推廣連結（cospan）。
+- v0.9.3／#63：adopt 現有角色的 Gemini 4 Neon 明確選模與相容建議；skip brain、DSH、OpenCode、圖示與版本號。
+- #62：defer，釘 head `58b89c7` 於 `monitored`；合併後只考慮移植 denied_actions 警告。
+
+水位推進為 v0.9.3、PR 63、issue 59，日期 2026-11-22。逐筆證據見 `DECISIONS.md` 同日條目。

@@ -108,7 +108,7 @@ Caveat, stated plainly: **the exact project-settings file path is undocumented a
 | Flag | Meaning |
 |---|---|
 | `--job <id>` | (`continue` only) resume a specific recorded job's conversation with its original persona, model, and permission profile |
-| `--model <id>` | explicit agy model (see `agy models`). Ids are effort-suffixed (`gemini-4-hydrogen-low`); the companion normalizes bare families (`gemini-3.8-flash` + `--effort`) and the aliases `hydrogen`/`carbon`/`argon`/`flash`/`pro`, and rejects unknown ids pre-flight |
+| `--model <id>` | explicit agy model (see `agy models`). Ids are effort-suffixed (`gemini-4-hydrogen-low`); the companion normalizes bare families (`gemini-3.8-flash` + `--effort`) and the aliases `hydrogen`/`neon`/`carbon`/`argon`/`flash`/`pro`, and rejects unknown ids pre-flight |
 | `--effort low\|medium\|high\|xhigh` | shorthand for `gemini-4-hydrogen-<effort>` |
 | `--restricted` / `--unrestricted` | permission profile override (ignored by `ask`). `unrestricted` is the default for `staffer`/`research`/`review`/`implement`, so `--restricted` is the flag you actually reach for |
 | `--restrict <modes\|none>` | (setup) per-repo policy: the listed modes default to restricted in this repository; `none` clears it. See [Per-repo policy](#per-repo-policy-setup---restrict) |
@@ -308,7 +308,7 @@ docs/                         references, installation guide and release notes
 
 The fork adopts Hydrogen defaults without tracking upstream package versions. `ask` uses low effort, `staffer` and `review` medium, and `research` and `implement` high. Bare `--effort low|medium|high|xhigh` selects `gemini-4-hydrogen-<effort>`.
 
-Explicit aliases are `hydrogen`, `carbon`, `argon`, `flash` (Gemini 3.8 Flash), and `pro`. Carbon/Argon support low/medium/high; requesting xhigh selects high with a warning. Full effort-suffixed IDs override `--effort`. Existing jobs retain their recorded model on continuation and restart unless an override is supported and explicitly supplied.
+Explicit aliases are `hydrogen`, `neon` (Gemini 4 Neon), `carbon`, `argon`, `flash` (Gemini 3.8 Flash), and `pro`. Neon supports low/medium/high/xhigh; Carbon/Argon support low/medium/high; requesting xhigh selects high with a warning. Full effort-suffixed IDs override `--effort`. Existing jobs retain their recorded model on continuation and restart unless an override is supported and explicitly supplied.
 
 If a model is unavailable, the companion reports the original error, queries `agy models`, and recommends a compatible model. An unavailable xhigh tier may receive a high-tier recommendation. Recommendations never trigger automatic retries or model switches. Authentication, quota and workspace permission errors do not trigger replacement discovery. The upstream Carbon -> Argon -> Hydrogen automatic chain belongs to `brain`, which this fork does not include.
 
